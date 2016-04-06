@@ -1,0 +1,75 @@
+{
+    "id": "com.athom.mqtt",
+    "name": {
+        "en": "Mosquitto MQTT client",
+        "nl": "Mosquitto MQTT client"
+    },
+    "description": {
+        "en": "Publish/subscribe messages to Mosquitto",
+        "nl": "Schrijf/lees berichten naar/van Mosquitto"
+    },
+    "version": "0.0.1",
+    "compatibility": "0.x",
+    "author": {
+        "name": "Johan Kuster",
+        "email": "j_kuster@hotmail.com"
+    },
+    "flow": {
+        "triggers": [
+            {
+               "id": "got_mqtt_message",
+               "title": {
+                   "en": "Receive message",
+                   "nl": "Ontvang bericht"            
+               },
+               "tokens": [
+                   {
+                       "name": "mqtt_message",
+                       "title": {
+                           "en": "message",
+                           "nl": "bericht"     
+                       }
+                   }
+               ],
+                "args":[
+	           {
+	               "name": "mqtt_topic",
+	               "type": "text",
+	               "placeholder": {
+	                   "en": "Topic",
+	                   "nl": "Topic"
+	               }
+	           }
+                ]
+               
+            }
+        ],
+        "actions": [
+	    {
+	        "id": "pub_mqtt_message",
+	        "title": {
+	            "en": "Publish message",
+	            "nl": "Stuur bericht"
+	        },
+                "args":[
+	           {
+	               "name": "mqtt_message",
+	               "type": "text",
+	               "placeholder": {
+	                   "en": "Message",
+	                   "nl": "Bericht"
+	               }
+	           },
+	           {
+	               "name": "mqtt_topic",
+	               "type": "text",
+	               "placeholder": {
+	                   "en": "Topic",
+	                   "nl": "Topic"
+	               }
+	           }
+                ]
+	    }
+        ]
+    }
+}
