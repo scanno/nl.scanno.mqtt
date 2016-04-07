@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+    <head>
+
+    </head>
+    <body>
+
+        <h1>Provide MQTT broker setting</h1>
+        <p>Name the URL and port (e.g. 192.168.1.40:1883) where the MQTT broker can be found</p>
+
+        <fieldset>
+            <legend>MQTT settings</legend>
+
+            <div class="field row">
+                <label for="Url">Url</label>
+                <input id="url" type="text" value="" />
+            </div>
+        </fieldset>
+
+        <button class="left" onclick="save()">Save changes</button>
+
+        <script type="text/javascript">
+        function onHomeyReady(){
+           Homey.get('url', function(err, url) {
+                  if (err) {
+                    console.error(err)
+                  } else {
+                    document.getElementById('url').value = url
+                  }
+                  Homey.ready()
+           })
+        }
+
+        function save() {
+            Homey.set('url', document.getElementById('url').value)
+        }
+
+        </script>
+
+    </body>
+</html>
