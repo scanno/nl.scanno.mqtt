@@ -8,26 +8,33 @@
         "en": "Publish/subscribe messages to Mosquitto",
         "nl": "Schrijf/lees berichten naar/van Mosquitto"
     },
-    "version": "0.0.1",
+    "version": "0.1.0",
     "compatibility": "0.x",
+    "category": [
+       "internet"
+    ],
     "author": {
         "name": "Johan Kuster",
         "email": "j_kuster@hotmail.com"
     },
+    "images":{
+       "large":"./assets/images/large.jpg",
+       "small":"./assets/images/small.jpg"
+     },
     "flow": {
         "triggers": [
             {
                "id": "got_mqtt_message",
                "title": {
                    "en": "Receive message",
-                   "nl": "Ontvang bericht"            
+                   "nl": "Ontvang bericht"
                },
                "tokens": [
                    {
                        "name": "mqtt_message",
                        "title": {
                            "en": "message",
-                           "nl": "bericht"     
+                           "nl": "bericht"
                        }
                    }
                ],
@@ -41,7 +48,7 @@
 	               }
 	           }
                 ]
-               
+
             }
         ],
         "actions": [
