@@ -1,0 +1,27 @@
+{
+  "name": "homey-mqtt-client",
+  "version": "0.1.0",
+  "description": "Mosquitto MQTT Client",
+  "main": "app.js",
+  "dependencies": {
+    "mqtt": "^1.7.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JohanKuster/homey-mqtt-client.git"
+  },
+  "keywords": [
+    "MQTT",
+    "Homey"
+  ],
+  "author": "Johan Kuster",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JohanKuster/homey-mqtt-client/issues"
+  },
+  "homepage": "https://github.com/JohanKuster/homey-mqtt-client#readme"
+}
