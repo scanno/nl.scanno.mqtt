@@ -1,82 +1,89 @@
 {
-    "id": "com.athom.mqtt",
-    "name": {
-        "en": "Mosquitto MQTT client",
-        "nl": "Mosquitto MQTT client"
-    },
-    "description": {
-        "en": "Publish/subscribe messages to Mosquitto",
-        "nl": "Schrijf/lees berichten naar/van Mosquitto"
-    },
-    "version": "0.1.0",
-    "compatibility": "0.x",
-    "category": [
-       "internet"
-    ],
-    "author": {
-        "name": "Johan Kuster",
-        "email": "j_kuster@hotmail.com"
-    },
-    "images":{
-       "large":"./assets/images/large.jpg",
-       "small":"./assets/images/small.jpg"
-     },
-    "flow": {
-        "triggers": [
-            {
-               "id": "got_mqtt_message",
-               "title": {
-                   "en": "Receive message",
-                   "nl": "Ontvang bericht"
-               },
-               "tokens": [
-                   {
-                       "name": "mqtt_message",
-                       "title": {
-                           "en": "message",
-                           "nl": "bericht"
-                       }
-                   }
-               ],
-                "args":[
-	           {
-	               "name": "mqtt_topic",
-	               "type": "text",
-	               "placeholder": {
-	                   "en": "Topic",
-	                   "nl": "Topic"
-	               }
+   "id": "nl.scanno.owntracks",
+   "name": {
+      "en": "Owntracks MQTT client",
+      "nl": "Owntracks MQTT client"
+   },
+   "description": {
+      "en": "Subscripe to Owntracks MQTT message for presence detection",
+      "nl": "Abonneer op MQTT berichten van Owntracks voor aanwezigheids detectie"
+   },
+   "version": "0.1.0",
+   "compatibility": "0.x",
+   "category": [
+      "internet"
+   ],
+   "author": {
+      "name": "Menno van Grinsven",
+      "email": "mgrinsven@gmail.com"
+   },
+   "images":{
+     "large":"./assets/images/large.jpg",
+     "small":"./assets/images/small.jpg"
+   },
+   "flow": {
+      "triggers": [
+         {
+            "id": "eventOwntracks",
+            "title": {
+               "en": "Receive Geofence triggers",
+               "nl": "Ontvang Geofence triggers"
+            },
+            "tokens": [
+               {
+                  "name": "eventType",
+                  "title": {
+                     "en": "Type of event (enter or leave)",
+                     "nl": "Type gebeurtenis (enter / leave)"
+                  }
+               }
+            ],
+            "args":[
+	       {
+	          "name": "mqttTopic",
+	          "type": "text",
+	          "placeholder": {
+	             "en": "Topic",
+	             "nl": "Topic"
 	           }
-                ]
-
-            }
-        ],
-        "actions": [
-	    {
-	        "id": "pub_mqtt_message",
-	        "title": {
-	            "en": "Publish message",
-	            "nl": "Stuur bericht"
+	       },
+	       {
+	           "name": "nameGeofence",
+	           "type": "text",
+	           "placeholder": {
+	              "en": "Geofence name",
+	              "nl": "Naam Geofence"
+	           }
+	       }
+            ]
+         }
+      ],
+      "actions": [
+         {
+	    "id": "pub_mqtt_message",
+	    "title": {
+	       "en": "Publish message",
+	       "nl": "Stuur bericht"
+	     },
+             "args":[
+	        {
+	           "name": "mqtt_message",
+	           "type": "text",
+	           "placeholder": {
+	              "en": "Message",
+	              "nl": "Bericht"
+	            }
 	        },
-                "args":[
-	           {
-	               "name": "mqtt_message",
-	               "type": "text",
-	               "placeholder": {
-	                   "en": "Message",
-	                   "nl": "Bericht"
-	               }
-	           },
-	           {
-	               "name": "mqtt_topic",
-	               "type": "text",
-	               "placeholder": {
-	                   "en": "Topic",
-	                   "nl": "Topic"
-	               }
+	        {
+	           "name": "mqtt_topic",
+	           "type": "text",
+	           "placeholder": {
+	              "en": "Topic",
+	              "nl": "Topic"
 	           }
-                ]
-	    }
-        ]
-    }
+	        }
+             ]
+	  }
+      ]
+   }
 }

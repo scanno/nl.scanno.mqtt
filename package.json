@@ -1,7 +1,7 @@
 {
-  "name": "homey-mqtt-client",
+  "name": "nl.scanno.owntracks",
   "version": "0.1.0",
-  "description": "Mosquitto MQTT Client",
+  "description": "Owntracks MQTT Client",
   "main": "app.js",
   "dependencies": {
     "mqtt": "^1.7.2"
@@ -12,16 +12,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/JohanKuster/homey-mqtt-client.git"
+    "url": "git+https://github.com/scanno/nl.scanno.owntracks.git"
   },
   "keywords": [
-    "MQTT",
+    "Owntracks",
     "Homey"
   ],
-  "author": "Johan Kuster",
+  "author": "Menno van Grinsven",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/JohanKuster/homey-mqtt-client/issues"
-  },
-  "homepage": "https://github.com/JohanKuster/homey-mqtt-client#readme"
+    "url": "https://github.com/scanno/nl.scanno.owntracks/issues"
+  }
 }
