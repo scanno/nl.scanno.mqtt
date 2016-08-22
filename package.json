@@ -1,7 +1,7 @@
 {
   "name": "nl.scanno.owntracks",
   "version": "0.1.0",
-  "description": "Owntracks MQTT Client",
+  "description": "Owntracks Client",
   "main": "app.js",
   "dependencies": {
     "mqtt": "^1.7.2"

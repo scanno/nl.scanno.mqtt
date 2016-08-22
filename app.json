@@ -1,8 +1,8 @@
 {
    "id": "nl.scanno.owntracks",
    "name": {
-      "en": "Owntracks MQTT client",
-      "nl": "Owntracks MQTT client"
+      "en": "Owntracks Client",
+      "nl": "Owntracks Client"
    },
    "description": {
       "en": "Subscripe to Owntracks MQTT message for presence detection",
@@ -17,9 +17,21 @@
       "name": "Menno van Grinsven",
       "email": "mgrinsven@gmail.com"
    },
+    "contributors": {
+        "developers": [
+            {
+                "name": "Menno van Grinsven",
+                "email": "mgrinsven@gmail.com"
+            },
+            {
+                "name": "Johan Kuster",
+                "email": "j_kuster@hotmail.com"
+            }
+        ]
+    },
    "images":{
-     "large":"./assets/images/large.jpg",
-     "small":"./assets/images/small.jpg"
+     "large":"./assets/images/large.png",
+     "small":"./assets/images/small.png"
    },
    "flow": {
       "triggers": [
