@@ -1,10 +1,13 @@
-# MQTT Client for Homey
+# Owntracks MQTT Client for Homey
 
-This app makes it possible to subscribe to messages available on a message broker. Messages can also be published
-on the message broker.
+This app is based on the MQTT Client for Homey made by Johan Kuster. So big thanks to him for creating the original
+MQTT Client for Homey.
 
-The app has a trigger with an argument where you have to define the topic you are subscribing to. There is a token "message"
-that will contain the message received.
+With this app it is posible to subscripe to MQTT topics and mainly to owntracks topics.
+
+At this time the app has one trigger card. On this card you have to specify the topic and the name of the geofence that
+is specified in the owntracks app.
+
 
 There is an Action where a message on a topic can be send to the broker.
 
@@ -23,11 +26,8 @@ What works:
 
 What doesn't:
 
-* Use brokers that require username/password
 * Starting from scratch without restarting Homey
 
 Future enhancements:
+* More trigger cards for boolean triggers
 
-* Support username password
-* More than one broker?
-* No reboot necesarry

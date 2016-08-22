@@ -56,7 +56,58 @@
 	           }
 	       }
             ]
+         },
+         {
+            "id": "enterGeofence",
+            "title": {
+               "en": "Enter Geofence trigger",
+               "nl": "Geofence binnen gegaan trigger"
+            },
+            "args":[
+	       {
+	          "name": "mqttTopic",
+	          "type": "text",
+	          "placeholder": {
+	             "en": "Topic",
+	             "nl": "Topic"
+	           }
+	       },
+	       {
+	           "name": "nameGeofence",
+	           "type": "text",
+	           "placeholder": {
+	              "en": "Geofence name",
+	              "nl": "Naam Geofence"
+	           }
+	       }
+            ]
+         },
+         {
+            "id": "leaveGeofence",
+            "title": {
+               "en": "Leave Geofence trigger",
+               "nl": "Geofence verlaten trigger"
+            },
+            "args":[
+	       {
+	          "name": "mqttTopic",
+	          "type": "text",
+	          "placeholder": {
+	             "en": "Topic",
+	             "nl": "Topic"
+	           }
+	       },
+	       {
+	           "name": "nameGeofence",
+	           "type": "text",
+	           "placeholder": {
+	              "en": "Geofence name",
+	              "nl": "Naam Geofence"
+	           }
+	       }
+            ]
          }
+
       ],
       "actions": [
          {
