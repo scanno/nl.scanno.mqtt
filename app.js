@@ -20,11 +20,11 @@ function receiveMessage(topic, message, args, state) {
             switch (jsonMsg.event) {
                case 'enter':
                   Homey.manager('flow').trigger('enterGeofence', null, { triggerTopic: topic, triggerFence: jsonMsg.desc });
-                  console.log("Trigger enter card for " + geofence);
+                  console.log("Trigger enter card for " + jsonMsg.desc);
                   break;
                case 'leave':
                   Homey.manager('flow').trigger('leaveGeofence', null, { triggerTopic: topic, triggerFence: jsonMsg.desc });
-                  console.log("Trigger leave card for " + geofence);
+                  console.log("Trigger leave card for " + jsonMsg.desc);
                   break;
             }
             Homey.manager('flow').trigger('eventOwntracks', { eventType: jsonMsg.event }, { triggerTopic: topic, triggerFence: jsonMsg.desc });
@@ -54,8 +54,24 @@ function processMessage (callback, args, state) {
    var client  = mqtt.connect('mqtt://' + Homey.manager('settings').get('url'), connect_options)
    console.log ("state.topic = " + state.triggerTopic + " topic = " + args.mqttTopic + " state.fence = " + state.triggerFence + " geofence = " + args.nameGeofence)
 
+   // MQTT subscription topics can contain "wildcards", i.e a + sign. However the topic returned
+   // by MQTT brokers contain the topic where the message is posted on. So we will have to take
+   // into account any wildcards when matching the topics.
+
+   var arrTriggerTopic = state.triggerTopic.split('/');
+   var arrMQTTTopic = args.mqttTopic.split('/');
+   var matchTopic = true;
+
+   for (var value in arrTriggerTopic) {
+      if ((arrTriggerTopic[value] !== arrMQTTTopic[value]) && (arrMQTTTopic[value] !== '+')) {
+         matchTopic = false;
+      }
+      console.log("trigger = " + arrTriggerTopic[value] + " mqttTopic = " + arrMQTTTopic[value]);
+   };
+
    // If the topic that triggered me the topic I was waiting for?
-   if (state.triggerTopic == args.mqttTopic ) {
+//   if (state.triggerTopic == args.mqttTopic ) {
+   if (matchTopic == true) {
       client.end();
       console.log ("triggerTopic = equal" )
       // The topic is equal, but we also need the geofence to be equal, if not then the 
@@ -77,6 +93,8 @@ function processMessage (callback, args, state) {
    // this is (still) an unknown topic. We arrive her only 1 time for every topic. The next time the if and else if will
    // trigger first.
    else {
+      // Add another check for the existence of the topic, just in case there is somehting falling through the 
+      // previous checks...
       if ( connectedTopics.indexOf(args.mqttTopic) == -1 ) {
          // Fill the array with known topics so I can check if I need to subscribe
          connectedTopics.push(args.mqttTopic)
