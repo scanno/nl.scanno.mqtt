@@ -3,47 +3,48 @@ var mqtt      = require("mqtt");
 var connectedTopics = [];
 
 function receiveMessage(topic, message, args, state) {
-   var geofence = ""
-   var event = ""
-   var accuracy = 0
    console.log("received '" + message.toString() + "' on '" + topic + "'");
 
-   // parse message as json and get 2 values:
-   // desc contains the geofence name that was entered of left
-   // event contains the action, i.e. : enter or leave
-   JSON.parse(message.toString(), function(k, v) {
-      switch (k) {
-         case "acc":
-            accuracy = parseInt(v);
-            break;
-         case "desc":
-            console.log("geofence: " + v + " arg: "+ args.nameGeofence);
-            geofence = v;
-            break;
-         case'event':
-            console.log("event: " + v);
-            event = v;
-            break;
-      }
-      return v;        // return everything else unchanged
-   });
-   if (accuracy <= parseInt(Homey.manager('settings').get('accuracy'))) {
-      // The accuracy of location is lower then the treshold value, so the location change will be trggerd
-      console.log("Accuracy is within limits")
-      switch (event.toString()) {
-         case 'enter':
-            Homey.manager('flow').trigger('enterGeofence', null, { triggerTopic: topic, triggerFence: geofence });
-            console.log("Trigger enter card for " + geofence);
-            break;
-         case 'leave':
-            Homey.manager('flow').trigger('leaveGeofence', null, { triggerTopic: topic, triggerFence: geofence });
-            console.log("Trigger leave card for " + geofence);
-            break;
-      }
-      Homey.manager('flow').trigger('eventOwntracks', { eventType: event.toString() }, { triggerTopic: topic, triggerFence: geofence });
-      console.log("Trigger generic card for " + geofence);
-   } else {
-      console.log ("Accuracy is "+ accuracy + " and needs to be below " + parseInt(Homey.manager('settings').get('accuracy')))
+   // parse the JSON message and put it in an object that we can use
+   var jsonMsg = JSON.parse(message.toString());
+
+   // owntracks has several different mesages that can be retreived and that should be handeld 
+   // differently. For now we only support the transition message. But prepare for more.
+   // for more information see http://owntracks.org/booklet/tech/json/
+   switch (jsonMsg._type) {
+      case 'transition':
+         // check the accuracy. If it is too low (i.e a high amount is meters) then perhaps we should skip the trigger
+         if (jsonMsg.acc <= parseInt(Homey.manager('settings').get('accuracy'))) {
+            // The accuracy of location is lower then the treshold value, so the location change will be trggerd
+            console.log("Accuracy is within limits")
+            switch (jsonMsg.event) {
+               case 'enter':
+                  Homey.manager('flow').trigger('enterGeofence', null, { triggerTopic: topic, triggerFence: jsonMsg.desc });
+                  console.log("Trigger enter card for " + geofence);
+                  break;
+               case 'leave':
+                  Homey.manager('flow').trigger('leaveGeofence', null, { triggerTopic: topic, triggerFence: jsonMsg.desc });
+                  console.log("Trigger leave card for " + geofence);
+                  break;
+            }
+            Homey.manager('flow').trigger('eventOwntracks', { eventType: jsonMsg.event }, { triggerTopic: topic, triggerFence: jsonMsg.desc });
+            console.log("Trigger generic card for " + jsonMsg.desc);
+         } else {
+            console.log ("Accuracy is "+ jsonMsg.acc + " and needs to be below " + parseInt(Homey.manager('settings').get('accuracy')))
+         }
+         break;
+      case 'location':
+         // This location object describes the location of the device that published it.
+         break;
+      case 'waypoint' :
+         // Waypoints denote specific geographical locations that you want to keep track of. You define a waypoint on the OwnTracks device, 
+         // and OwnTracks publishes this waypoint (if the waypoint is marked shared)
+         break;
+      case 'encrypted' :
+         // This payload type contains a single data element with the original JSON object _type (e.g. location, beacon, etc.) encrypted payload in it.
+         break;
+      default:
+         break;
    }
 }
 
@@ -76,19 +77,23 @@ function processMessage (callback, args, state) {
    // this is (still) an unknown topic. We arrive her only 1 time for every topic. The next time the if and else if will
    // trigger first.
    else {
-      // Fill the array with known topics so I can check if I need to subscribe
-      connectedTopics.push(args.mqttTopic)
-      // On connection ...
-      client.on('connect', function () {
-         // subscribe to the topic
-         client.subscribe(args.mqttTopic)
-         console.log("waiting "+ args.mqttTopic );
-         // Wait for any message
-         client.on('message',function(topic, message, packet) {
-            // When a message is received, call receiveMessage for further processing
-            receiveMessage(topic, message, args, state);
+      if ( connectedTopics.indexOf(args.mqttTopic) == -1 ) {
+         // Fill the array with known topics so I can check if I need to subscribe
+         connectedTopics.push(args.mqttTopic)
+         // On connection ...
+         client.on('connect', function () {
+            // subscribe to the topic
+            client.subscribe(args.mqttTopic)
+            console.log("waiting "+ args.mqttTopic );
+            // Wait for any message
+            client.on('message',function(topic, message, packet) {
+               // When a message is received, call receiveMessage for further processing
+               receiveMessage(topic, message, args, state);
+            });
          });
-      });
+      } else {
+         callback (null, false);
+      };
    };
 }
 
