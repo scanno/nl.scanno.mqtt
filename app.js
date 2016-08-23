@@ -5,6 +5,7 @@ var connectedTopics = [];
 function receiveMessage(topic, message, args, state) {
    var geofence = ""
    var event = ""
+   var accuracy = 0
    console.log("received '" + message.toString() + "' on '" + topic + "'");
 
    // parse message as json and get 2 values:
@@ -12,6 +13,9 @@ function receiveMessage(topic, message, args, state) {
    // event contains the action, i.e. : enter or leave
    JSON.parse(message.toString(), function(k, v) {
       switch (k) {
+         case "acc":
+            accuracy = parseInt(v);
+            break;
          case "desc":
             console.log("geofence: " + v + " arg: "+ args.nameGeofence);
             geofence = v;
@@ -23,18 +27,24 @@ function receiveMessage(topic, message, args, state) {
       }
       return v;        // return everything else unchanged
    });
-   switch (event.toString()) {
-      case 'enter':
-         Homey.manager('flow').trigger('enterGeofence', null, { triggerTopic: topic, triggerFence: geofence });
-         console.log("Trigger enter card for " + geofence);
-         break;
-      case 'leave':
-         Homey.manager('flow').trigger('leaveGeofence', null, { triggerTopic: topic, triggerFence: geofence });
-         console.log("Trigger leave card for " + geofence);
-         break;
+   if (accuracy <= parseInt(Homey.manager('settings').get('accuracy'))) {
+      // The accuracy of location is lower then the treshold value, so the location change will be trggerd
+      console.log("Accuracy is within limits")
+      switch (event.toString()) {
+         case 'enter':
+            Homey.manager('flow').trigger('enterGeofence', null, { triggerTopic: topic, triggerFence: geofence });
+            console.log("Trigger enter card for " + geofence);
+            break;
+         case 'leave':
+            Homey.manager('flow').trigger('leaveGeofence', null, { triggerTopic: topic, triggerFence: geofence });
+            console.log("Trigger leave card for " + geofence);
+            break;
+      }
+      Homey.manager('flow').trigger('eventOwntracks', { eventType: event.toString() }, { triggerTopic: topic, triggerFence: geofence });
+      console.log("Trigger generic card for " + geofence);
+   } else {
+      console.log ("Accuracy is "+ accuracy + " and needs to be below " + parseInt(Homey.manager('settings').get('accuracy')))
    }
-   Homey.manager('flow').trigger('eventOwntracks', { eventType: event.toString() }, { triggerTopic: topic, triggerFence: geofence });
-   console.log("Trigger generic card for " + geofence);
 }
 
 function processMessage (callback, args, state) {
