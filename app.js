@@ -3,6 +3,7 @@ var mqtt      = require("mqtt");
 var connectedTopics = [];
 
 function receiveMessage(topic, message, args, state) {
+  // Homey.debug();
    console.log("received '" + message.toString() + "' on '" + topic + "'");
 
    // parse the JSON message and put it in an object that we can use
@@ -27,7 +28,7 @@ function receiveMessage(topic, message, args, state) {
                   console.log("Trigger leave card for " + jsonMsg.desc);
                   break;
             }
-            Homey.manager('flow').trigger('eventOwntracks', { eventType: jsonMsg.event }, { triggerTopic: topic, triggerFence: jsonMsg.desc });
+            Homey.manager('flow').trigger('eventOwntracks', { event: jsonMsg.event }, { triggerTopic: topic, triggerFence: jsonMsg.desc });
             console.log("Trigger generic card for " + jsonMsg.desc);
          } else {
             console.log ("Accuracy is "+ jsonMsg.acc + " and needs to be below " + parseInt(Homey.manager('settings').get('accuracy')))
@@ -48,15 +49,44 @@ function receiveMessage(topic, message, args, state) {
    }
 }
 
+function getBrokerURL() {
+   var urlBroker = []
+    
+   if (Homey.manager('settings').get('otbroker') == true) {
+      urlBroker.push("mqtt://");
+//      urlBroker.push("public-mqtt.owntracks.org:8889");
+      urlBroker.push("broker.hivemq.com:1883");
+   } else {
+      if (Homey.manager('settings').get('tls') == true) {
+        urlBroker.push("mqtts://");
+      } else {
+         urlBroker.push("mqtt://");
+      };
+      urlBroker.push(Homey.manager('settings').get('url'));
+      urlBroker.push(":"+Homey.manager('settings').get('ip_port'));
+   }
+   return urlBroker.join('');
+}
+
+function getConnectOptions() {
+   var connect_options = "[{ username: '" + Homey.manager('settings').get('user') + "', password: '" + Homey.manager('settings').get('password') + "' }]"
+   if (Homey.manager('settings').get('otbroker') == true) {
+      connect_options = "";
+   }
+   return connect_options
+}
+
 function processMessage (callback, args, state) {
-   // connect to the MQTT broker
-   var connect_options = "[{ username: '" + Homey.manager('settings').get('user') + "', password: '" + Homey.manager('settings').get('password') + "' }]" 
-   var client  = mqtt.connect('mqtt://' + Homey.manager('settings').get('url'), connect_options)
+   console.log("url string: " + getBrokerURL());
+   console.log("connect options: " + getConnectOptions()); 
+
+   var client  = mqtt.connect(getBrokerURL(), getConnectOptions())
+
    console.log ("state.topic = " + state.triggerTopic + " topic = " + args.mqttTopic + " state.fence = " + state.triggerFence + " geofence = " + args.nameGeofence)
 
    // MQTT subscription topics can contain "wildcards", i.e a + sign. However the topic returned
-   // by MQTT brokers contain the topic where the message is posted on. So we will have to take
-   // into account any wildcards when matching the topics.
+   // by MQTT brokers contain the topic where the message is posted on. In that topic, the wildcard
+   // is replaced by the actual value. So we will have to take into account any wildcards when matching the topics.
 
    var arrTriggerTopic = state.triggerTopic.split('/');
    var arrMQTTTopic = args.mqttTopic.split('/');
@@ -64,7 +94,9 @@ function processMessage (callback, args, state) {
 
    for (var value in arrTriggerTopic) {
       if ((arrTriggerTopic[value] !== arrMQTTTopic[value]) && (arrMQTTTopic[value] !== '+')) {
-         matchTopic = false;
+         if (arrMQTTTopic[value] !== undefined) {
+            matchTopic = false;
+         }
       }
       console.log("trigger = " + arrTriggerTopic[value] + " mqttTopic = " + arrMQTTTopic[value]);
    };
@@ -110,6 +142,8 @@ function processMessage (callback, args, state) {
             });
          });
       } else {
+         console.log("Fallback triggered");
+         client.end();
          callback (null, false);
       };
    };
@@ -124,18 +158,18 @@ function listenForMessage () {
 
 function getArgs () {
    // Give all the triggers a kick to retrieve the arg(topic) defined on the trigger.
-   Homey.manager('flow').trigger('eventOwntracks', { eventType: 'Hallo homey' }, { triggerTopic: 'x', triggerFence: 'x' }, function(err, result) {
+   Homey.manager('flow').trigger('eventOwntracks', { event: 'Hallo homey', battery: 0 }, { triggerTopic: 'x', triggerFence: 'x' }, function(err, result) {
       if( err ) {
          return Homey.error(err)
      }
    });
-   Homey.manager('flow').trigger('enterGeofence', { eventType: 'Hallo homey' }, { triggerTopic: 'x', triggerFence: 'x' }, function(err, result) {
+   Homey.manager('flow').trigger('enterGeofence', { battery: 0 }, { triggerTopic: 'x', triggerFence: 'x' }, function(err, result) {
       if( err ) {
          return Homey.error(err)
      }
    });
 
-   Homey.manager('flow').trigger('leaveGeofence', { eventType: 'Hallo homey' }, { triggerTopic: 'x', triggerFence: 'x' }, function(err, result) {
+   Homey.manager('flow').trigger('leaveGeofence', { battery: 0 }, { triggerTopic: 'x', triggerFence: 'x' }, function(err, result) {
       if( err ) {
          return Homey.error(err)
      }
@@ -160,6 +194,7 @@ function listenForAction () {
 exports.init = function() {
    // get the arguments of any trigger. Once triggered, the interval will stop
    console.log ("MQTT client Ready")
+   Homey.log("Owntracks client ready")
    var myTim = setInterval(timer, 5000)
    function timer() {
       getArgs()
@@ -177,3 +212,44 @@ exports.init = function() {
    listenForMessage()
    listenForAction()
 }
+
+function testBroker(callback, args) {
+   var urlBroker = [];
+
+   if (args.otbroker == true) {
+      urlBroker.push("mqtt://");
+//      urlBroker.push("public-mqtt.owntracks.org:8889");
+      urlBroker.push("broker.hivemq.com:1883");
+   } else {
+      if (args.tls == true) {
+        urlBroker.push("mqtts://");
+      } else {
+         urlBroker.push("mqtt://");
+      };
+      urlBroker.push(args.url);
+      urlBroker.push(":" + args.ip_port);
+   }
+
+   Homey.log("Testing "+ urlBroker.join('') + " with " + connect_options);
+
+   var connect_options = "[{ username: '" + args.user + "', password: '" + args.password + "' }]"
+   if (args.otbroker == true) {
+      connect_options = "";
+   }
+   var client  = mqtt.connect(urlBroker.join(''), connect_options);
+   client.on('error', function (error) {
+      Homey.log("Connection to the broker sucesfull");
+      client.end();
+      callback(false, null);
+   });
+   client.on('connect', function() {
+      Homey.log("Error occured during connection to the broker");
+      client.end();
+      callback(true, null);
+   });
+   client.end();
+   callback(false,null);
+}
+
+module.exports.testBroker = testBroker;
+

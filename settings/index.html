@@ -5,78 +5,273 @@
     </head>
     <body>
 
-        <h1>Provide MQTT broker setting</h1>
-        <p>Name the URL and port (e.g. 192.168.1.40:1883) where the MQTT broker can be found</p>
-        <p>If you want to use a public broker, you can try broker.hivemq.com:1883. Leave the user and password fields empty</p>
+        <h1 data-i18n="settings.app.title"></h1>
+        <form id="owntracks">
 
-        <fieldset>
-            <legend>MQTT settings</legend>
+        <fieldset id="server">
+            <legend>
+                <label data-i18n="settings.app.server.server_title"></label>
+            </legend>
+            <div class="field">
+                <input class="checkbox" id="otbroker" type="checkbox" checked="true"
+                    onchange="owntracks.server.server_settings.disabled = checked">
+                <label class="form_label" for="otbroker" data-i18n="settings.app.server.public_broker"</label>
+            </div>
 
-            <div class="field row">
-                <label for="Url">Url</label>
-                <input id="url" type="text" value="" />
-            </div>
-            <div class="field row">
-                <label for="User">User</label>
-                <input id="user" type="text" value="" />
-            </div>
-            <div class="field row">
-                <label for="Password">Password</label>
-                <input id="password" type="password" value="" />
-            </div>
-            <div class="field row">
-                <label for="Accuracy">Location Accuracy</label>
-                <input id="accuracy" type="text" value="" />
-            </div>
+            <fieldset id="server_settings">
+                <legend>
+                    <label data-i18n="settings.app.server.server_details"></label>
+                </legend>
+
+                <p data-i18n="settings.app.server.server_explanation"></p>
+
+                <div class="field row">
+                    <label class="form_label" for="Url" data-i18n="settings.app.server.url"></label>
+                    <br>
+                    <input class="form_input" id="url" type="text" value="" /> <br>
+                </div>
+
+                <div class="field row">
+                    <label class="form_label" for="ip_port" data-i18n="settings.app.server.port"></label>
+                    <br>
+                    <input class="form_input" id="ip_port" type="text" value="1883" /> <br>
+                </div>
+
+                <div class="field">
+                    <input class="checkbox" id="tls" type="checkbox"/>
+                    <label class="form_label" for="TLS" data-i18n="settings.app.server.tls"></label>
+                </div>
+
+                <div class="field row">
+                    <label class="form_label" for="User" data-i18n="settings.app.server.username"></label>
+                    <br>
+                    <input class="form_input" id="user" type="text" value="" /> <br>
+                 </div>
+
+                 <div class="field row">
+                     <label class="form_label" for="Password" data-i18n="settings.app.server.password"></label>
+                     <br>
+                     <input class="form_input" id="password" type="password" value="" /> <br>
+                </div>
+            </fieldset>
         </fieldset>
 
-        <button class="left" onclick="save()">Save changes</button>
+        <fieldset id="client_settings">
+            <legend>
+                <label data-i18n="settings.app.client.client_settings"></label>
+            </legend>
+            
+            <p data-i18n="settings.app.client.accuracy_explanation"></p>
+            
+            <div class="field row">
+                <label class="form_label" for="Accuracy" data-i18n="settings.app.client.accuracy"></label>
+                <br>
+                <input class="form_input" id="accuracy" type="text" value="100" /> <br>
+            </div>
+            
+            <p data-i18n="settings.app.client.topic_explanation"></p>
+           
+            <div class="field row">
+                <label class="form_label" for="topic" data-i18n="settings.app.client.topic"></label>
+                <br>
+                <input class="form_input" id="topic" type="text" value="owntracks/+/+/event" /> <br>
+            </div>
+            
+        </fieldset>
+        </form>
+
+        <p data-i18n="settings.app.log.title"></p>
+        <div id="testresult"></div>
+
+        <button class="right" id="button_test" onclick="test()" data-i18n="settings.app.button.test">Test</button>
+        <button class="right" id="button_save" onclick="save()" data-i18n="settings.app.button.save">Save</button>
+
 
         <script type="text/javascript">
+        
+        var currentValues = {};
+        
         function onHomeyReady(){
+            // Disable save button until settings have been saved
+            var button_save = document.getElementById('button_save');
+            button_save.disabled = true;
+           console.log("onMhomeyReady entered");
+
+           Homey.get('otbroker', function(err, otbroker) {
+                  if (err) {
+                    console.error(err)
+                  } else {
+                    document.getElementById('otbroker').value = otbroker
+                  }
+                  if (typeof otbroker == 'undefined' || otbroker == null) otbroker = false;
+                  document.getElementById('otbroker').checked = otbroker;
+                  currentValues.otbroker = otbroker
+           })
            Homey.get('url', function(err, url) {
                   if (err) {
                     console.error(err)
                   } else {
                     document.getElementById('url').value = url
+                    currentValues.url = url
                   }
-//                  Homey.ready()
+           })
+           Homey.get('ip_port', function(err, ip_port) {
+                  if (err) {
+                    console.error(err)
+                  } else {
+                    document.getElementById('ip_port').value = ip_port
+                    currentValues.ip_port = ip_port
+                  }
+           })
+
+           Homey.get('tls', function(err, tls) {
+                  if (err) {
+                    console.error(err)
+                  } else {
+                    document.getElementById('tls').value = tls
+                  }
+                  if (typeof tls == 'undefined' || tls == null) tls = false;
+                  document.getElementById('tls').checked = tls;
+                  currentValues.tls = tls
            })
            Homey.get('user', function(err, user) {
                   if (err) {
                     console.error(err)
                   } else {
                     document.getElementById('user').value = user
+                    currentValues.user = user
                   }
-//                  Homey.ready()
            })
            Homey.get('password', function(err, password) {
                   if (err) {
                     console.error(err)
                   } else {
                     document.getElementById('password').value = password
+                    currentValues.password = password
                   }
-//                  Homey.ready()
            })
-                  Homey.get('accuracy', function(err, url) {
+           Homey.get('accuracy', function(err, accuracy) {
                   if (err) {
                     console.error(err)
                   } else {
-                    document.getElementById('accuracy').value = url
+                    document.getElementById('accuracy').value = accuracy
+                    currentValues.accuracy = accuracy
                   }
+           })
+           Homey.get('topic', function(err, topic) {
+                  if (err) {
+                    console.error(err)
+                  } else {
+                    document.getElementById('topic').value = topic
+                    currentValues.topic = topic
+                  }
+                  console.log("Homey.ready");
                   Homey.ready()
            })
 
         }
 
         function save() {
-            Homey.set('url', document.getElementById('url').value)
-            Homey.set('user', document.getElementById('user').value)
-            Homey.set('password', document.getElementById('password').value)
-            Homey.set('accuracy', document.getElementById('accuracy').value)
+            console.log('current values', currentValues);
+        
+            var button_save = document.getElementById('button_save');
+            button_save.disabled = true;
+        
+            var valuesHaveBeenChanged = false;
+            
+            if (currentValues.otbroker != document.getElementById('otbroker').checked) {
+                Homey.set('otbroker', document.getElementById('otbroker').checked)
+                valuesHaveBeenChanged = true;
+                currentValues.otbroker = document.getElementById('otbroker').checked;
+            }
+            
+            if (currentValues.url != document.getElementById('url').value {
+                Homey.set('url', document.getElementById('url').value)
+                valuesHaveBeenChanged = true;
+                currentValues.url = document.getElementById('url').value;
+            }
+
+            if (currentValues.ip_port != document.getElementById('ip_port').value {
+                Homey.set('ip_port', document.getElementById('ip_port').value)
+                valuesHaveBeenChanged = true;
+                currentValues.ip_port = document.getElementById('ip_port').value;
+            }
+            
+            if (currentValues.tls != document.getElementById('tls').checked {
+                Homey.set('tls', document.getElementById('tls').checked)
+                valuesHaveBeenChanged = true;
+                currentValues.tls = document.getElementById('tls').checked;
+            }
+
+            if (currentValues.user != document.getElementById('user').value {
+                Homey.set('user', document.getElementById('user').value)
+                valuesHaveBeenChanged = true;
+                currentValues.usee = document.getElementById('user').value;
+            }
+
+            if (currentValues.password != document.getElementById('password').value {
+                Homey.set('password', document.getElementById('password').value)
+                valuesHaveBeenChanged = true;
+                currentValues.password = document.getElementById('password').value;
+            }
+
+            if (currentValues.accuracy != document.getElementById('accuracy').value {
+                Homey.set('accuracy', document.getElementById('accuracy').value)
+                valuesHaveBeenChanged = true;
+                currentValues.accuracy = document.getElementById('accuracy').value;
+            }
+ 
+            if (currentValues.topic != document.getElementById('topic').value {
+                Homey.set('topic', document.getElementById('topic').value)
+                valuesHaveBeenChanged = true;
+                currentValues.topic = document.getElementById('topic').value;
+            }
+            if (valuesHaveBeenChanged) Homey.alert(__('settings.app.messages.settings_saved'));
+            else Homey.alert(__('settings.app.messages.settings_noSettingsChanged'));
         }
+        
+        function test() {
+            console.log("Test function entered");
+            document.getElementById('testresult').innerHTML = __('settings.app.messages.testing');
+            var button_test = document.getElementById('button_test');
+            var button_save = document.getElementById('button_save');
+            button_test.disabled = true;
+            button_save.disabled = true;
+        
+            var otbroker = document.getElementById('otbroker').checked;
+            var tls = document.getElementById('tls').checked
+            var url = document.getElementById('url').value;
+            var ip_port = document.getElementById('ip_port').value;
+            var user = document.getElementById('user').value;
+            var password = document.getElementById('password').value;
+
+            console.log("Testing settings");
+
+            Homey.api('POST', '/get/broker/', { 
+                "otbroker" : otbroker,
+                "tls" : tls;
+                "url" : url,
+                "ip_port" : ip_port,
+                "user" : user, 
+                "password" : password
+            }, function(err, broker) {
+                if (!err) {
+                    console.log("Connetion succesfull");
+//                    getWeather(wundergroundkey, address);
+                } else {
+                    // Oeps, something went wrong here
+                    Homey.alert(__('settings.app.messages.unable_get_location'));
+                    document.getElementById('testresult').innerHTML = __('settings.app.messages.unable_get_location');
+                    button_test.disabled = false;
+                    button_save.disabled = true;
+                }
+                
+            });
+        }
+    }
 
         </script>
 
     </body>
 </html>
+

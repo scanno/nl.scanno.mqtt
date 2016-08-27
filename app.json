@@ -43,7 +43,7 @@
             },
             "tokens": [
                {
-                  "name": "eventType",
+                  "name": "event",
                   "title": {
                      "en": "Type of event (enter or leave)",
                      "nl": "Type gebeurtenis (enter / leave)"
