@@ -30,13 +30,23 @@ This app supports the following trigger cards:
 - a card that will trigger on a enter / leave event on the specified geofence. This card provides a tag that contains 
   the event (i.e. the values can be enter or leave)
 
-The setting page contains 3 input fields for specifying the adress of the MQTT server, userid and password for that server.
-When using a public MQTT server, you can just leave the userid and password fields empty.
+The settings page contains:
+- The option to use the HiveMQ public broker
+- IP adres or DNS name of the broker wehre to connect top
+- Portnumber to connect to.
+- The option to use a secure session (TLS). No support for self signed certificates.
+- Userid for the broker connection
+- Password to use for the broker connection
+- The ability to specify the loaction accuracy in meters. Default is set at 100 meters. If the accuracy is worse than
+  100 meters, the received event will be ignored.
 
-As said this app is based on the MQTT Client from Johan Kuster. It also has the same problems:
-Because there is a kind of chicken and egg problem here, you need to reboot/unplug the homey after you have defined the URL and 
-first active trigger. A new trigger will work after any other active trigger was triggered. Of course you could also restart
-your Homey.
+Changes from version 0.10:
+- Better JSON parsing
+- Better topic handling
+- Accuracy added
+- TLS support
+- No need to reboot after setting or changing broker settings
+- Fixed the accumulating event triggering
 
 What works:
 
@@ -44,10 +54,4 @@ What works:
 * The same topic can be used more than once
 * works for Mosquitto MQTT broker but probably also for any other broker that supports MQTT.
 
-What doesn't:
-
-* Starting from scratch without restarting Homey
-
-Future enhancements:
-* Look into adding secure sessions (i.e TLS)
 
