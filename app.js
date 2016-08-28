@@ -2,6 +2,10 @@
 var mqtt      = require("mqtt");
 var connectedTopics = [];
 
+// At this time i do not have another idea on how to control the client connection when changing the
+// settings besides to have the client connection available globally.
+var connectedClient = null;
+
 function receiveMessage(topic, message, args, state) {
   // Homey.debug();
    console.log("received '" + message.toString() + "' on '" + topic + "'");
@@ -36,10 +40,12 @@ function receiveMessage(topic, message, args, state) {
          break;
       case 'location':
          // This location object describes the location of the device that published it.
+         console.log("We have received a location message");
          break;
       case 'waypoint' :
          // Waypoints denote specific geographical locations that you want to keep track of. You define a waypoint on the OwnTracks device, 
          // and OwnTracks publishes this waypoint (if the waypoint is marked shared)
+         console.log("We have received a waypoint message");
          break;
       case 'encrypted' :
          // This payload type contains a single data element with the original JSON object _type (e.g. location, beacon, etc.) encrypted payload in it.
@@ -54,7 +60,6 @@ function getBrokerURL() {
     
    if (Homey.manager('settings').get('otbroker') == true) {
       urlBroker.push("mqtt://");
-//      urlBroker.push("public-mqtt.owntracks.org:8889");
       urlBroker.push("broker.hivemq.com:1883");
    } else {
       if (Homey.manager('settings').get('tls') == true) {
@@ -80,8 +85,11 @@ function processMessage (callback, args, state) {
    console.log("url string: " + getBrokerURL());
    console.log("connect options: " + getConnectOptions()); 
 
-   var client  = mqtt.connect(getBrokerURL(), getConnectOptions())
-
+//   var client  = mqtt.connect(getBrokerURL(), getConnectOptions())
+   if (connectedClient == null) {
+      console.log("connectedClient == null");
+      connectedClient = mqtt.connect(getBrokerURL(), getConnectOptions());
+   }
    console.log ("state.topic = " + state.triggerTopic + " topic = " + args.mqttTopic + " state.fence = " + state.triggerFence + " geofence = " + args.nameGeofence)
 
    // MQTT subscription topics can contain "wildcards", i.e a + sign. However the topic returned
@@ -94,6 +102,8 @@ function processMessage (callback, args, state) {
 
    for (var value in arrTriggerTopic) {
       if ((arrTriggerTopic[value] !== arrMQTTTopic[value]) && (arrMQTTTopic[value] !== '+')) {
+         // This is a bit dirty because it would allow events to be delivered also to topics that do not have
+         // the trailing event. In de future, when allowing the other message types, this would cause problems
          if (arrMQTTTopic[value] !== undefined) {
             matchTopic = false;
          }
@@ -102,9 +112,8 @@ function processMessage (callback, args, state) {
    };
 
    // If the topic that triggered me the topic I was waiting for?
-//   if (state.triggerTopic == args.mqttTopic ) {
    if (matchTopic == true) {
-      client.end();
+//      client.end();
       console.log ("triggerTopic = equal" )
       // The topic is equal, but we also need the geofence to be equal, if not then the 
       // callback should be false
@@ -119,7 +128,7 @@ function processMessage (callback, args, state) {
    // This is not the topic I was waiting for and it is a known topic
    else if (state.triggerTopic !== args.mqttTopic & connectedTopics.indexOf(args.mqttTopic) !== -1) {
       console.log("We are not waiting for this topic");
-      client.end()
+//      client.end()
       callback( null, false )
    }
    // this is (still) an unknown topic. We arrive her only 1 time for every topic. The next time the if and else if will
@@ -131,19 +140,22 @@ function processMessage (callback, args, state) {
          // Fill the array with known topics so I can check if I need to subscribe
          connectedTopics.push(args.mqttTopic)
          // On connection ...
-         client.on('connect', function () {
+//         client.on('connect', function () {
+         connectedClient.on('connect', function () {
             // subscribe to the topic
-            client.subscribe(args.mqttTopic)
+//            client.subscribe(args.mqttTopic)
+            connectedClient.subscribe(args.mqttTopic)
             console.log("waiting "+ args.mqttTopic );
             // Wait for any message
-            client.on('message',function(topic, message, packet) {
+//            client.on('message',function(topic, message, packet) {
+            connectedClient.on('message',function(topic, message, packet) {
                // When a message is received, call receiveMessage for further processing
                receiveMessage(topic, message, args, state);
             });
          });
       } else {
          console.log("Fallback triggered");
-         client.end();
+//         client.end();
          callback (null, false);
       };
    };
@@ -158,18 +170,18 @@ function listenForMessage () {
 
 function getArgs () {
    // Give all the triggers a kick to retrieve the arg(topic) defined on the trigger.
-   Homey.manager('flow').trigger('eventOwntracks', { event: 'Hallo homey', battery: 0 }, { triggerTopic: 'x', triggerFence: 'x' }, function(err, result) {
+   Homey.manager('flow').trigger('eventOwntracks', { event: 'Hallo homey' }, { triggerTopic: 'x', triggerFence: 'x' }, function(err, result) {
       if( err ) {
          return Homey.error(err)
      }
    });
-   Homey.manager('flow').trigger('enterGeofence', { battery: 0 }, { triggerTopic: 'x', triggerFence: 'x' }, function(err, result) {
+   Homey.manager('flow').trigger('enterGeofence', null, { triggerTopic: 'x', triggerFence: 'x' }, function(err, result) {
       if( err ) {
          return Homey.error(err)
      }
    });
 
-   Homey.manager('flow').trigger('leaveGeofence', { battery: 0 }, { triggerTopic: 'x', triggerFence: 'x' }, function(err, result) {
+   Homey.manager('flow').trigger('leaveGeofence', null, { triggerTopic: 'x', triggerFence: 'x' }, function(err, result) {
       if( err ) {
          return Homey.error(err)
      }
@@ -208,48 +220,95 @@ exports.init = function() {
    Homey.manager('flow').on('trigger.leaveGeofence', function( callback, args ){
       clearInterval(myTim)
    });
-    
+
    listenForMessage()
    listenForAction()
 }
 
 function testBroker(callback, args) {
    var urlBroker = [];
-
-   if (args.otbroker == true) {
+   console.log("testBroker reached");
+   console.log(args);
+   if (args.body.otbroker == true) {
       urlBroker.push("mqtt://");
-//      urlBroker.push("public-mqtt.owntracks.org:8889");
       urlBroker.push("broker.hivemq.com:1883");
    } else {
-      if (args.tls == true) {
+      if (args.body.tls == true) {
         urlBroker.push("mqtts://");
       } else {
          urlBroker.push("mqtt://");
       };
-      urlBroker.push(args.url);
-      urlBroker.push(":" + args.ip_port);
+      urlBroker.push(args.body.url);
+      urlBroker.push(":" + args.body.ip_port);
    }
 
+   var connect_options = "[{ username: '" + args.body.user + "', password: '" + args.body.password + "', connectTimeout: '1' }]"
    Homey.log("Testing "+ urlBroker.join('') + " with " + connect_options);
-
-   var connect_options = "[{ username: '" + args.user + "', password: '" + args.password + "' }]"
-   if (args.otbroker == true) {
+   
+   if (args.body.otbroker == true) {
       connect_options = "";
    }
    var client  = mqtt.connect(urlBroker.join(''), connect_options);
-   client.on('error', function (error) {
-      Homey.log("Connection to the broker sucesfull");
-      client.end();
-      callback(false, null);
-   });
+
    client.on('connect', function() {
-      Homey.log("Error occured during connection to the broker");
+      client.on('error', function (error) {
+         Homey.log("Error occured during connection to the broker");
+         client.end();
+         callback(false, null);
+      });
+
+      Homey.log("Connection to the broker sucesfull");
       client.end();
       callback(true, null);
    });
-   client.end();
-   callback(false,null);
+//   client.end();
+//   callback(false, null);
+
+}
+
+function changedSettings(callback, args) {
+   console.log("changedSettings called");
+   console.log(args.body);
+   console.log("topics:" + connectedTopics)
+
+/*   var urlBroker = []
+
+   if (args.body.otbroker == true) {
+      urlBroker.push("mqtt://");
+      urlBroker.push("broker.hivemq.com:1883");
+   } else {
+      if (args.body.tls == true) {
+        urlBroker.push("mqtts://");
+      } else {
+         urlBroker.push("mqtt://");
+      };
+      urlBroker.push(args.body.url);
+      urlBroker.push(":"+args.body.ip_port);
+   }
+   console.log("Broker URL: " + urlBroker.join(''));
+
+   var connect_options = "[{ username: '" + args.body.user + "', password: '" + args.body.password + "' }]"
+   if (args.body.otbroker == true) {
+      connect_options = "";
+   }
+
+   console.log("Connect options: " + connect_options);
+   var client  = mqtt.connect(urlBroker.join(''), connect_options)
+   client.on('connect', function () {
+      console.log(client);
+      // unsubscribe topics*
+      client.unsubscribe(connectedTopics);*
+   });*/
+   connectedClient.unsubscribe(connectedTopics);
+   connectedClient.end(true);
+//   client.end();
+   connectedTopics = []
+   console.log("topics:" + connectedTopics);
+   connectedClient = null;
+   getArgs();
+   callback(false, null);
 }
 
 module.exports.testBroker = testBroker;
+module.exports.changedSettings = changedSettings;
 

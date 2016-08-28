@@ -1,25 +1,30 @@
-module.exports = [
-    {
-        description:	'Test Owntracks connection',
-        method: 		'POST',
-        path:			'/get/broker/',
-        fn: function(callback, args) {
-            Homey.log("");
-            Homey.log("API: Incoming POST on /test/broker/");
-            
-            Homey.app.testBroker(callback, args);
-        }
-/*    },
-    
-    {
-        description:	'Get Homey\'s location',
-        method: 		'POST',
-        path:			'/get/restart/',
-        fn: function(callback, args) {
-            Homey.log("");
-            Homey.log("API: Incoming POST on /get/restart/");
-            
-            Homey.app.setStatusChanged(callback, args);
-        }*/
-    }
-]
+module.exports = [{
+   description:	'Test Owntracks connection',
+   method:      'POST',
+   path:        '/test/broker/',
+   requires_authorization: true,
+   role: 'owner',
+   fn: function(callback, args) {
+      Homey.log("");
+      Homey.log("API: Incoming POST on /set/broker/");
+      Homey.app.testBroker(callback, args);
+      callback(callback, args);
+   }
+},
+{
+   description:	'Notify on settings changed',
+   method:      'POST',
+   path:        '/test/settingschange/',
+   requires_authorization: true,
+   role: 'owner',
+   fn: function(callback, args) {
+      Homey.log("");
+      Homey.log("API: Incoming POST on /test/settingschange/");
+      Homey.app.changedSettings(callback, args);
+      callback(callback, args);
+   }
+}]
+
+
+
+

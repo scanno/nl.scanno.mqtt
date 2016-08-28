@@ -33,7 +33,8 @@
             
              "messages" : {
                  "testing" : "Testing, please wait...",
-                 "unable_get_location" : "Unable to get Homey's location, please try again or specify a location manually.",
+                 "unable_set_settings" : "There was an error trying to apply the settings.",
+                 "error_connect_broker" : "Unable to connect to the broker, please check the broker settings.",
                  "settings_success_tested" : "Settings succesfully tested. Please use the save button to save your settings",
                  "settings_saved" : "Settings saved",
                  "settings_noSettingsChanged" : "No setting has been changed",
