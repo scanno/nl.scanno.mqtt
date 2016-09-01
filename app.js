@@ -7,7 +7,6 @@ var connectedTopics = [];
 var connectedClient = null;
 
 function receiveMessage(topic, message, args, state) {
-  // Homey.debug();
    console.log("received '" + message.toString() + "' on '" + topic + "'");
 
    // parse the JSON message and put it in an object that we can use
@@ -70,22 +69,25 @@ function getBrokerURL() {
       urlBroker.push(Homey.manager('settings').get('url'));
       urlBroker.push(":"+Homey.manager('settings').get('ip_port'));
    }
+   console.log("Broker URL: "+ urlBroker.join(''));
    return urlBroker.join('');
 }
 
 function getConnectOptions() {
-   var connect_options = "[{ username: '" + Homey.manager('settings').get('user') + "', password: '" + Homey.manager('settings').get('password') + "' }]"
-   if (Homey.manager('settings').get('otbroker') == true) {
-      connect_options = "";
-   }
-   return connect_options
+
+  if (Homey.manager('settings').get('otbroker') == true) {
+      return null;
+   } else {
+      var connect_options = {
+         keepalive: 3600,
+         username: Homey.manager('settings').get('user'),
+         password: Homey.manager('settings').get('password')
+      };
+      return connect_options
+   };
 }
 
 function processMessage (callback, args, state) {
-   console.log("url string: " + getBrokerURL());
-   console.log("connect options: " + getConnectOptions()); 
-
-//   var client  = mqtt.connect(getBrokerURL(), getConnectOptions())
    if (connectedClient == null) {
       console.log("connectedClient == null");
       connectedClient = mqtt.connect(getBrokerURL(), getConnectOptions());
@@ -137,17 +139,24 @@ function processMessage (callback, args, state) {
       // Add another check for the existence of the topic, just in case there is somehting falling through the 
       // previous checks...
       if ( connectedTopics.indexOf(args.mqttTopic) == -1 ) {
+
          // Fill the array with known topics so I can check if I need to subscribe
          connectedTopics.push(args.mqttTopic)
+
          // On connection ...
-//         client.on('connect', function () {
          connectedClient.on('connect', function () {
             // subscribe to the topic
-//            client.subscribe(args.mqttTopic)
+            connectedClient.on('reconnect', function() {
+               console.log("MQTT Reconnect");
+            });
+
+            connectedClient.on('error', function(error) {
+               console.log("MQTT error occured: " + error);
+            });
+
             connectedClient.subscribe(args.mqttTopic)
             console.log("waiting "+ args.mqttTopic );
             // Wait for any message
-//            client.on('message',function(topic, message, packet) {
             connectedClient.on('message',function(topic, message, packet) {
                // When a message is received, call receiveMessage for further processing
                receiveMessage(topic, message, args, state);
@@ -155,7 +164,6 @@ function processMessage (callback, args, state) {
          });
       } else {
          console.log("Fallback triggered");
-//         client.end();
          callback (null, false);
       };
    };
