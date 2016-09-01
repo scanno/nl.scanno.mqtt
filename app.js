@@ -95,7 +95,21 @@ function processMessage (callback, args, state) {
    if (connectedClient == null) {
       console.log("connectedClient == null");
       connectedClient = mqtt.connect(getBrokerURL(), getConnectOptions());
-   }
+
+      connectedClient.on('reconnect', function() {
+         console.log("MQTT Reconnect");
+         reconnectClient = true;
+       });
+
+      connectedClient.on('error', function(error) {
+         console.log("MQTT error occured: " + error);
+      });
+
+      connectedClient.on('message',function(topic, message, packet) {
+         // When a message is received, call receiveMessage for further processing
+         receiveMessage(topic, message, args, state);
+      });
+   };
    console.log ("state.topic = " + state.triggerTopic + " topic = " + args.mqttTopic + " state.fence = " + state.triggerFence + " geofence = " + args.nameGeofence)
 
    // MQTT subscription topics can contain "wildcards", i.e a + sign. However the topic returned
@@ -144,15 +158,6 @@ function processMessage (callback, args, state) {
          // Fill the array with known topics so I can check if I need to subscribe
          connectedTopics.push(args.mqttTopic)
 
-         connectedClient.on('reconnect', function() {
-            console.log("MQTT Reconnect");
-            reconnectClient = true;
-         });
-
-         connectedClient.on('error', function(error) {
-            console.log("MQTT error occured: " + error);
-         });
-
          // On connection ...
          connectedClient.on('connect', function (connack) {
             console.log("MQTT client connected");
@@ -161,14 +166,6 @@ function processMessage (callback, args, state) {
 
             connectedClient.subscribe(args.mqttTopic)
             console.log("waiting "+ args.mqttTopic );
-
-            // Wait for any message
-            if (!reconnectClient) {
-               connectedClient.on('message',function(topic, message, packet) {
-                  // When a message is received, call receiveMessage for further processing
-                 receiveMessage(topic, message, args, state);
-               });
-            };
          });
       } else {
          console.log("Fallback triggered");
