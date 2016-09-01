@@ -88,6 +88,10 @@ function getConnectOptions() {
 }
 
 function processMessage (callback, args, state) {
+   var reconnectClient = false;
+   // Make a connection to the broker. But only do this once. When the app is started, the connectedClient
+   // variable is set to null, so there is no client connection yet to the broker. If so, then connect to the broker.
+   // Otherwise, skip the connection.
    if (connectedClient == null) {
       console.log("connectedClient == null");
       connectedClient = mqtt.connect(getBrokerURL(), getConnectOptions());
@@ -110,14 +114,12 @@ function processMessage (callback, args, state) {
             matchTopic = false;
          }
       }
-      console.log("trigger = " + arrTriggerTopic[value] + " mqttTopic = " + arrMQTTTopic[value]);
    };
 
    // If the topic that triggered me the topic I was waiting for?
    if (matchTopic == true) {
-//      client.end();
       console.log ("triggerTopic = equal" )
-      // The topic is equal, but we also need the geofence to be equal, if not then the 
+      // The topic is equal, but we also need the geofence to be equal as well, if not then the 
       // callback should be false
       if ( state.triggerFence == args.nameGeofence) {
          console.log ("triggerFence = equal")
@@ -125,12 +127,11 @@ function processMessage (callback, args, state) {
       } else {
          callback ( null, false);
       }
-      callback( null, true )
+//      callback( null, true )
    }
    // This is not the topic I was waiting for and it is a known topic
    else if (state.triggerTopic !== args.mqttTopic & connectedTopics.indexOf(args.mqttTopic) !== -1) {
       console.log("We are not waiting for this topic");
-//      client.end()
       callback( null, false )
    }
    // this is (still) an unknown topic. We arrive her only 1 time for every topic. The next time the if and else if will
@@ -143,24 +144,31 @@ function processMessage (callback, args, state) {
          // Fill the array with known topics so I can check if I need to subscribe
          connectedTopics.push(args.mqttTopic)
 
-         // On connection ...
-         connectedClient.on('connect', function () {
-            // subscribe to the topic
-            connectedClient.on('reconnect', function() {
-               console.log("MQTT Reconnect");
-            });
+         connectedClient.on('reconnect', function() {
+            console.log("MQTT Reconnect");
+            reconnectClient = true;
+         });
 
-            connectedClient.on('error', function(error) {
-               console.log("MQTT error occured: " + error);
-            });
+         connectedClient.on('error', function(error) {
+            console.log("MQTT error occured: " + error);
+         });
+
+         // On connection ...
+         connectedClient.on('connect', function (connack) {
+            console.log("MQTT client connected");
+            console.log("Connected Topics: " + connectedTopics);
+            console.log("reconnectedClient " + reconnectClient);
 
             connectedClient.subscribe(args.mqttTopic)
             console.log("waiting "+ args.mqttTopic );
+
             // Wait for any message
-            connectedClient.on('message',function(topic, message, packet) {
-               // When a message is received, call receiveMessage for further processing
-               receiveMessage(topic, message, args, state);
-            });
+            if (!reconnectClient) {
+               connectedClient.on('message',function(topic, message, packet) {
+                  // When a message is received, call receiveMessage for further processing
+                 receiveMessage(topic, message, args, state);
+               });
+            };
          });
       } else {
          console.log("Fallback triggered");
@@ -170,7 +178,7 @@ function processMessage (callback, args, state) {
 }
 
 function listenForMessage () {
-   // Start listening for the events
+   // Start listening for the events.
    Homey.manager('flow').on('trigger.eventOwntracks', processMessage)
    Homey.manager('flow').on('trigger.enterGeofence', processMessage)
    Homey.manager('flow').on('trigger.leaveGeofence', processMessage)    
@@ -183,6 +191,7 @@ function getArgs () {
          return Homey.error(err)
      }
    });
+
    Homey.manager('flow').trigger('enterGeofence', null, { triggerTopic: 'x', triggerFence: 'x' }, function(err, result) {
       if( err ) {
          return Homey.error(err)
@@ -213,7 +222,6 @@ function listenForAction () {
 
 exports.init = function() {
    // get the arguments of any trigger. Once triggered, the interval will stop
-   console.log ("MQTT client Ready")
    Homey.log("Owntracks client ready")
    var myTim = setInterval(timer, 5000)
    function timer() {
@@ -309,7 +317,6 @@ function changedSettings(callback, args) {
    });*/
    connectedClient.unsubscribe(connectedTopics);
    connectedClient.end(true);
-//   client.end();
    connectedTopics = []
    console.log("topics:" + connectedTopics);
    connectedClient = null;
