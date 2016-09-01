@@ -40,6 +40,10 @@ The settings page contains:
 - The ability to specify the loaction accuracy in meters. Default is set at 100 meters. If the accuracy is worse than
   100 meters, the received event will be ignored.
 
+Changes in version 0.3.0:
+- Finally solved the multi triggering
+- Connect options solved (userid and password)
+
 Changes in version 0.2.0:
 - Better JSON parsing
 - Better topic handling
