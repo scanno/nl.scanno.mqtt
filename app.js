@@ -2,12 +2,40 @@
 var mqtt      = require("mqtt");
 var connectedTopics = [];
 
+function getDateTime() {
+
+    var date = new Date();
+
+    var hour = date.getHours();
+    hour = (hour < 10 ? "0" : "") + hour;
+
+    var min  = date.getMinutes();
+    min = (min < 10 ? "0" : "") + min;
+
+    var sec  = date.getSeconds();
+    sec = (sec < 10 ? "0" : "") + sec;
+
+    var year = date.getFullYear();
+
+    var month = date.getMonth() + 1;
+    month = (month < 10 ? "0" : "") + month;
+
+    var day  = date.getDate();
+    day = (day < 10 ? "0" : "") + day;
+
+    return year + month + day + "-" + hour + ":" + min + ":" + sec;
+}
+
+function writelog(line) {
+   console.log( getDateTime() + "   " + line);
+}
+
 // At this time i do not have another idea on how to control the client connection when changing the
 // settings besides to have the client connection available globally.
 var connectedClient = null;
 
 function receiveMessage(topic, message, args, state) {
-   console.log("received '" + message.toString() + "' on '" + topic + "'");
+   writelog("received '" + message.toString() + "' on '" + topic + "'");
 
    // parse the JSON message and put it in an object that we can use
    var jsonMsg = JSON.parse(message.toString());
@@ -20,31 +48,31 @@ function receiveMessage(topic, message, args, state) {
          // check the accuracy. If it is too low (i.e a high amount is meters) then perhaps we should skip the trigger
          if (jsonMsg.acc <= parseInt(Homey.manager('settings').get('accuracy'))) {
             // The accuracy of location is lower then the treshold value, so the location change will be trggerd
-            console.log("Accuracy is within limits")
+            writelog("Accuracy is within limits")
             switch (jsonMsg.event) {
                case 'enter':
                   Homey.manager('flow').trigger('enterGeofence', null, { triggerTopic: topic, triggerFence: jsonMsg.desc });
-                  console.log("Trigger enter card for " + jsonMsg.desc);
+                  writelog("Trigger enter card for " + jsonMsg.desc);
                   break;
                case 'leave':
                   Homey.manager('flow').trigger('leaveGeofence', null, { triggerTopic: topic, triggerFence: jsonMsg.desc });
-                  console.log("Trigger leave card for " + jsonMsg.desc);
+                  writelog("Trigger leave card for " + jsonMsg.desc);
                   break;
             }
             Homey.manager('flow').trigger('eventOwntracks', { event: jsonMsg.event }, { triggerTopic: topic, triggerFence: jsonMsg.desc });
-            console.log("Trigger generic card for " + jsonMsg.desc);
+            writelog("Trigger generic card for " + jsonMsg.desc);
          } else {
-            console.log ("Accuracy is "+ jsonMsg.acc + " and needs to be below " + parseInt(Homey.manager('settings').get('accuracy')))
+            writelog ("Accuracy is "+ jsonMsg.acc + " and needs to be below " + parseInt(Homey.manager('settings').get('accuracy')))
          }
          break;
       case 'location':
          // This location object describes the location of the device that published it.
-         console.log("We have received a location message");
+         writelog("We have received a location message");
          break;
       case 'waypoint' :
          // Waypoints denote specific geographical locations that you want to keep track of. You define a waypoint on the OwnTracks device, 
          // and OwnTracks publishes this waypoint (if the waypoint is marked shared)
-         console.log("We have received a waypoint message");
+         writelog("We have received a waypoint message");
          break;
       case 'encrypted' :
          // This payload type contains a single data element with the original JSON object _type (e.g. location, beacon, etc.) encrypted payload in it.
@@ -69,7 +97,7 @@ function getBrokerURL() {
       urlBroker.push(Homey.manager('settings').get('url'));
       urlBroker.push(":"+Homey.manager('settings').get('ip_port'));
    }
-   console.log("Broker URL: "+ urlBroker.join(''));
+   writelog("Broker URL: "+ urlBroker.join(''));
    return urlBroker.join('');
 }
 
@@ -79,7 +107,7 @@ function getConnectOptions() {
       return null;
    } else {
       var connect_options = {
-         keepalive: 3600,
+         keepalive: 10,
          username: Homey.manager('settings').get('user'),
          password: Homey.manager('settings').get('password')
       };
@@ -93,24 +121,35 @@ function processMessage (callback, args, state) {
    // variable is set to null, so there is no client connection yet to the broker. If so, then connect to the broker.
    // Otherwise, skip the connection.
    if (connectedClient == null) {
-      console.log("connectedClient == null");
+      writelog("connectedClient == null");
       connectedClient = mqtt.connect(getBrokerURL(), getConnectOptions());
 
       connectedClient.on('reconnect', function() {
-         console.log("MQTT Reconnect");
+         writelog("MQTT Reconnect");
+         reconnectClient = true;
+       });
+
+      connectedClient.on('close', function() {
+         writelog("MQTT Closed");
+         reconnectClient = true;
+       });
+
+      connectedClient.on('offline', function() {
+         writelog("MQTT Offline");
          reconnectClient = true;
        });
 
       connectedClient.on('error', function(error) {
-         console.log("MQTT error occured: " + error);
+         writelog("MQTT error occured: " + error);
       });
 
       connectedClient.on('message',function(topic, message, packet) {
          // When a message is received, call receiveMessage for further processing
+         writelog("OnMessage called");
          receiveMessage(topic, message, args, state);
       });
    };
-   console.log ("state.topic = " + state.triggerTopic + " topic = " + args.mqttTopic + " state.fence = " + state.triggerFence + " geofence = " + args.nameGeofence)
+   writelog ("state.topic = " + state.triggerTopic + " topic = " + args.mqttTopic + " state.fence = " + state.triggerFence + " geofence = " + args.nameGeofence)
 
    // MQTT subscription topics can contain "wildcards", i.e a + sign. However the topic returned
    // by MQTT brokers contain the topic where the message is posted on. In that topic, the wildcard
@@ -136,16 +175,16 @@ function processMessage (callback, args, state) {
       // The topic is equal, but we also need the geofence to be equal as well, if not then the 
       // callback should be false
       if ( state.triggerFence == args.nameGeofence) {
-         console.log ("triggerFence = equal")
+         writelog ("triggerFence = equal")
          callback ( null, true);
       } else {
          callback ( null, false);
       }
-//      callback( null, true )
+      callback( null, true )
    }
    // This is not the topic I was waiting for and it is a known topic
    else if (state.triggerTopic !== args.mqttTopic & connectedTopics.indexOf(args.mqttTopic) !== -1) {
-      console.log("We are not waiting for this topic");
+      writelog("We are not waiting for this topic");
       callback( null, false )
    }
    // this is (still) an unknown topic. We arrive her only 1 time for every topic. The next time the if and else if will
@@ -160,18 +199,19 @@ function processMessage (callback, args, state) {
 
          // On connection ...
          connectedClient.on('connect', function (connack) {
-            console.log("MQTT client connected");
-            console.log("Connected Topics: " + connectedTopics);
-            console.log("reconnectedClient " + reconnectClient);
+            writelog("MQTT client connected");
+            writelog("Connected Topics: " + connectedTopics);
+            writelog("reconnectedClient " + reconnectClient);
 
             connectedClient.subscribe(args.mqttTopic)
-            console.log("waiting "+ args.mqttTopic );
+            writelog("waiting "+ args.mqttTopic );
          });
       } else {
-         console.log("Fallback triggered");
+         writelog("Fallback triggered");
          callback (null, false);
       };
    };
+   callback (null, false);
 }
 
 function listenForMessage () {
@@ -210,7 +250,7 @@ function listenForAction () {
       var client  = mqtt.connect('mqtt://' + Homey.manager('settings').get('url'), connect_options);
       client.on('connect', function () {
          client.publish(args.mqtt_topic, args.geofence_name, args.mqtt_message);
-         console.log("send " + args.mqtt_message + " on topic " + args.mqtt_topic);
+         writelog("send " + args.mqtt_message + " on topic " + args.mqtt_topic);
          client.end();
       });
       callback( null, true ); // we've fired successfully
@@ -240,8 +280,8 @@ exports.init = function() {
 
 function testBroker(callback, args) {
    var urlBroker = [];
-   console.log("testBroker reached");
-   console.log(args);
+   writelog("testBroker reached");
+   writelog(args);
    if (args.body.otbroker == true) {
       urlBroker.push("mqtt://");
       urlBroker.push("broker.hivemq.com:1883");
@@ -256,7 +296,7 @@ function testBroker(callback, args) {
    }
 
    var connect_options = "[{ username: '" + args.body.user + "', password: '" + args.body.password + "', connectTimeout: '1' }]"
-   Homey.log("Testing "+ urlBroker.join('') + " with " + connect_options);
+   writelog("Testing "+ urlBroker.join('') + " with " + connect_options);
    
    if (args.body.otbroker == true) {
       connect_options = "";
@@ -265,12 +305,12 @@ function testBroker(callback, args) {
 
    client.on('connect', function() {
       client.on('error', function (error) {
-         Homey.log("Error occured during connection to the broker");
+         writelog("Error occured during connection to the broker");
          client.end();
          callback(false, null);
       });
 
-      Homey.log("Connection to the broker sucesfull");
+      writelog("Connection to the broker sucesfull");
       client.end();
       callback(true, null);
    });
@@ -280,9 +320,9 @@ function testBroker(callback, args) {
 }
 
 function changedSettings(callback, args) {
-   console.log("changedSettings called");
-   console.log(args.body);
-   console.log("topics:" + connectedTopics)
+   writelog("changedSettings called");
+   writelog(args.body);
+   writelog("topics:" + connectedTopics)
 
 /*   var urlBroker = []
 
@@ -312,10 +352,13 @@ function changedSettings(callback, args) {
       // unsubscribe topics*
       client.unsubscribe(connectedTopics);*
    });*/
-   connectedClient.unsubscribe(connectedTopics);
+   if (connectedTopics.length > 0) {
+      connectedClient.unsubscribe(connectedTopics);
+      connectedTopics = [];
+   };
+
    connectedClient.end(true);
-   connectedTopics = []
-   console.log("topics:" + connectedTopics);
+   writelog("topics:" + connectedTopics);
    connectedClient = null;
    getArgs();
    callback(false, null);
