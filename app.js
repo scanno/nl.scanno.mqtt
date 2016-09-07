@@ -1,6 +1,9 @@
 "use strict";
 var mqtt      = require("mqtt");
 var connectedTopics = [];
+// At this time i do not have another idea on how to control the client connection when changing the
+// settings besides to have the client connection available globally.
+var connectedClient = null;
 
 function getDateTime() {
 
@@ -30,55 +33,59 @@ function writelog(line) {
    console.log( getDateTime() + "   " + line);
 }
 
-// At this time i do not have another idea on how to control the client connection when changing the
-// settings besides to have the client connection available globally.
-var connectedClient = null;
-
 function receiveMessage(topic, message, args, state) {
+   var validJSON = true;
    writelog("received '" + message.toString() + "' on '" + topic + "'");
 
    // parse the JSON message and put it in an object that we can use
-   var jsonMsg = JSON.parse(message.toString());
+   try {
+      var jsonMsg = JSON.parse(message.toString());
+   } catch(e) {
+      writelog("Received message is not a valid JSON string");
+      validJSON = false;
+   };
 
    // owntracks has several different mesages that can be retreived and that should be handeld 
    // differently. For now we only support the transition message. But prepare for more.
    // for more information see http://owntracks.org/booklet/tech/json/
-   switch (jsonMsg._type) {
-      case 'transition':
-         // check the accuracy. If it is too low (i.e a high amount is meters) then perhaps we should skip the trigger
-         if (jsonMsg.acc <= parseInt(Homey.manager('settings').get('accuracy'))) {
-            // The accuracy of location is lower then the treshold value, so the location change will be trggerd
-            writelog("Accuracy is within limits")
-            switch (jsonMsg.event) {
-               case 'enter':
-                  Homey.manager('flow').trigger('enterGeofence', null, { triggerTopic: topic, triggerFence: jsonMsg.desc });
-                  writelog("Trigger enter card for " + jsonMsg.desc);
-                  break;
-               case 'leave':
-                  Homey.manager('flow').trigger('leaveGeofence', null, { triggerTopic: topic, triggerFence: jsonMsg.desc });
-                  writelog("Trigger leave card for " + jsonMsg.desc);
-                  break;
+   if (validJSON && jsonMsg._type !== undefined) {
+      switch (jsonMsg._type) {
+         case 'transition':
+            // check the accuracy. If it is too low (i.e a high amount is meters) then perhaps we should skip the trigger
+            if (jsonMsg.acc <= parseInt(Homey.manager('settings').get('accuracy'))) {
+               // The accuracy of location is lower then the treshold value, so the location change will be trggerd
+               writelog("Accuracy is within limits")
+               switch (jsonMsg.event) {
+                  case 'enter':
+                     Homey.manager('flow').trigger('enterGeofence', null, { triggerTopic: topic, triggerFence: jsonMsg.desc });
+                     writelog("Trigger enter card for " + jsonMsg.desc);
+                     break;
+                  case 'leave':
+                     Homey.manager('flow').trigger('leaveGeofence', null, { triggerTopic: topic, triggerFence: jsonMsg.desc });
+                     writelog("Trigger leave card for " + jsonMsg.desc);
+                     break;
+               }
+               Homey.manager('flow').trigger('eventOwntracks', { event: jsonMsg.event }, { triggerTopic: topic, triggerFence: jsonMsg.desc });
+               writelog("Trigger generic card for " + jsonMsg.desc);
+            } else {
+               writelog ("Accuracy is "+ jsonMsg.acc + " and needs to be below " + parseInt(Homey.manager('settings').get('accuracy')))
             }
-            Homey.manager('flow').trigger('eventOwntracks', { event: jsonMsg.event }, { triggerTopic: topic, triggerFence: jsonMsg.desc });
-            writelog("Trigger generic card for " + jsonMsg.desc);
-         } else {
-            writelog ("Accuracy is "+ jsonMsg.acc + " and needs to be below " + parseInt(Homey.manager('settings').get('accuracy')))
-         }
-         break;
-      case 'location':
-         // This location object describes the location of the device that published it.
-         writelog("We have received a location message");
-         break;
-      case 'waypoint' :
-         // Waypoints denote specific geographical locations that you want to keep track of. You define a waypoint on the OwnTracks device, 
-         // and OwnTracks publishes this waypoint (if the waypoint is marked shared)
-         writelog("We have received a waypoint message");
-         break;
-      case 'encrypted' :
-         // This payload type contains a single data element with the original JSON object _type (e.g. location, beacon, etc.) encrypted payload in it.
-         break;
-      default:
-         break;
+            break;
+         case 'location':
+            // This location object describes the location of the device that published it.
+            writelog("We have received a location message");
+            break;
+         case 'waypoint' :
+            // Waypoints denote specific geographical locations that you want to keep track of. You define a waypoint on the OwnTracks device, 
+            // and OwnTracks publishes this waypoint (if the waypoint is marked shared)
+            writelog("We have received a waypoint message");
+            break;
+         case 'encrypted' :
+            // This payload type contains a single data element with the original JSON object _type (e.g. location, beacon, etc.) encrypted payload in it.
+            break;
+         default:
+            break;
+      }
    }
 }
 
