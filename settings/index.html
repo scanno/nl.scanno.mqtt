@@ -80,8 +80,9 @@
         </fieldset>
         </form>
 
-<!--        <p data-i18n="settings.app.log.title"></p>
-        <div id="testresult"></div> -->
+        <p data-i18n="settings.app.log.title"></p>
+        <button class="right" id="button_getlog" onclick="showLogLines()" data-i18n="settings.app.button.getlogs">Get Logs</button>
+        <div id="loglines"></div>
 
 <!--        <button class="right" id="button_test" onclick="test()" data-i18n="settings.app.button.test">Test</button>  -->
         <button class="right" id="button_save" onclick="save()" data-i18n="settings.app.button.save">Save</button>
@@ -163,7 +164,7 @@
                   }
            })
 */
-           Homey.ready()
+           Homey.ready();
         }
 
         function save() {
@@ -288,6 +289,18 @@
                 }
                 
             });
+        }
+
+        function showLogLines() {
+           Homey.api('GET', 'test/getloglines/', function(err, result) {
+              if (!err) {
+                 document.getElementById('loglines').innerHTML = '';
+                 for (var i=0; i < result.length; i++) {
+                    document.getElementById('loglines').innerHTML += result[i];
+                    document.getElementById('loglines').innerHTML += "<br />";
+                 }
+              };
+           });
         }
         </script>
 

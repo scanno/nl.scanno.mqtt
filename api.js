@@ -23,6 +23,20 @@ module.exports = [{
       Homey.app.changedSettings(callback, args);
       callback(callback, args);
    }
+},
+{
+   description:	'Show latst 10 loglines',
+   method:      'GET',
+   path:        '/test/getloglines/',
+   requires_authorization: true,
+   role: 'owner',
+   fn: function(callback, args) {
+      Homey.log("");
+      Homey.log("API: Incoming POST on /test/getloglines/");
+      Homey.app.getLogLines(callback, args);
+      callback(callback, args);
+   }
+
 }]
 
 

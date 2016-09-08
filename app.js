@@ -1,6 +1,8 @@
 "use strict";
 var mqtt      = require("mqtt");
 var connectedTopics = [];
+var logArray = [];
+
 // At this time i do not have another idea on how to control the client connection when changing the
 // settings besides to have the client connection available globally.
 var connectedClient = null;
@@ -30,7 +32,13 @@ function getDateTime() {
 }
 
 function writelog(line) {
-   console.log( getDateTime() + "   " + line);
+   var logLine = getDateTime() + "   " + line;
+   console.log( logLine );
+
+   if (logArray.length >= 20) {
+      logArray.shift();
+   }
+   logArray.push(logLine);
 }
 
 function receiveMessage(topic, message, args, state) {
@@ -371,6 +379,13 @@ function changedSettings(callback, args) {
    callback(false, null);
 }
 
+function getLogLines(callback, args) {
+   writelog("getLogLines called");
+   callback ( false, logArray);
+}
+
+
 module.exports.testBroker = testBroker;
 module.exports.changedSettings = changedSettings;
+module.exports.getLogLines = getLogLines;
 

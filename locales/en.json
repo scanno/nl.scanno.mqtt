@@ -24,11 +24,12 @@
                         
             "button" : {
                 "save" : "Save",
-                "test" : "Test"
+                "test" : "Test",
+                "getlogs" : "Get logs"
             },
             
              "log" : {
-                "title" : "Test log:"
+                "title" : "Lat 10 log lines:"
             },
             
              "messages" : {

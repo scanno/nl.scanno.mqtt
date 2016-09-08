@@ -24,11 +24,12 @@
                         
             "button" : {
                 "save" : "Opslaan",
-                "test" : "Test"
+                "test" : "Test",
+                "getlogs" : "Log ophalen"
             },
             
              "log" : {
-                "title" : "Test log:"
+                "title" : "Laatste 10 log regels"
             },
             
              "messages" : {
