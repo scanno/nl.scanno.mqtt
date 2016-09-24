@@ -1,6 +1,6 @@
 {
   "name": "nl.scanno.owntracks",
-  "version": "0.1.0",
+  "version": "0.3.6",
   "description": "Owntracks Client",
   "main": "app.js",
   "dependencies": {

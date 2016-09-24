@@ -39,7 +39,10 @@ The settings page contains:
 - Password to use for the broker connection
 - The ability to specify the loaction accuracy in meters. Default is set at 100 meters. If the accuracy is worse than
   100 meters, the received event will be ignored.
-  
+
+Changes in versio 0.3.6:
+- Added an option to view the last 20 loglines
+
 Changes in version 0.3.5:
 - Solve settings save crash
 - Solved crash due to receiving non JSON message
