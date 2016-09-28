@@ -372,7 +372,10 @@ function changedSettings(callback, args) {
       connectedTopics = [];
    };
 
-   connectedClient.end(true);
+   if (connectedClient !== null) {
+      connectedClient.end(true);
+   }
+
    writelog("topics:" + connectedTopics);
    connectedClient = null;
    getArgs();
