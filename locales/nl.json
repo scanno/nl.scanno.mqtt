@@ -29,7 +29,7 @@
             },
             
              "log" : {
-                "title" : "Laatste 10 log regels"
+                "title" : "Laatste log regels"
             },
             
              "messages" : {

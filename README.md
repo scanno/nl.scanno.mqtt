@@ -40,7 +40,10 @@ The settings page contains:
 - The ability to specify the loaction accuracy in meters. Default is set at 100 meters. If the accuracy is worse than
   100 meters, the received event will be ignored.
 
-Changes in versio 0.3.6:
+Changes in version 0.3.7:
+- Hopefully fixed crash when first time installed and change settings.
+
+Changes in version 0.3.6:
 - Added an option to view the last 20 loglines
 
 Changes in version 0.3.5:
