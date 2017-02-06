@@ -8,8 +8,8 @@
       "en": "Subscripe to Owntracks MQTT messages for presence detection",
       "nl": "Abonneer op MQTT berichten van Owntracks voor aanwezigheids detectie"
    },
-   "version": "0.3.7",
-   "compatibility": "0.x",
+   "version": "0.3.8",
+   "compatibility": "1.x",
    "category": [
       "internet"
    ],
