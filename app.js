@@ -126,12 +126,16 @@ function processMessage (callback, args, state) {
    var arrTriggerTopic = state.triggerTopic.split('/');
    var arrMQTTTopic = args.mqttTopic.split('/');
    var matchTopic = true;
+   var topicWildcard = false;
 
    for (var value in arrTriggerTopic) {
       if ((arrTriggerTopic[value] !== arrMQTTTopic[value]) && (arrMQTTTopic[value] !== '+')) {
+         if (arrMQTTTopic[value] == '#') {
+            topicWildcard = true;
+         }
          // This is a bit dirty because it would allow events to be delivered also to topics that do not have
          // the trailing event. In de future, when allowing the other message types, this would cause problems
-         if (arrMQTTTopic[value] !== undefined) {
+         if (arrMQTTTopic[value] !== undefined && topicWildcard == false) {
             matchTopic = false;
          }
       }
@@ -181,7 +185,7 @@ function listenForMessage () {
 
 function getArgs () {
    // Give all the triggers a kick to retrieve the arg(topic) defined on the trigger.
-   Homey.manager('flow').trigger('eventMQTT', { event: 'Hallo homey' }, { triggerTopic: 'x' }, function(err, result) {
+   Homey.manager('flow').trigger('eventMQTT', { message: 'Hallo homey' }, { triggerTopic: 'x' }, function(err, result) {
       if( err ) {
          return Homey.error(err)
      }
@@ -189,16 +193,23 @@ function getArgs () {
 }
 
 function listenForAction () {
+   writelog("listenFirAction called")
    Homey.manager('flow').on('action.pub_mqtt_message', function( callback, args ){
+      writelog("Send flow triggered");
       // Read the URL from the settings.
-      var connect_options = "[{ username: '" + Homey.manager('settings').get('user') + "', password: '" + Homey.manager('settings').get('password') + "' }]"
-      console.log("connect_options = " + connect_options) 
-      var client  = mqtt.connect('mqtt://' + Homey.manager('settings').get('url'), connect_options);
-      client.on('connect', function () {
-         client.publish(args.mqtt_topic, args.geofence_name, args.mqtt_message);
-         writelog("send " + args.mqtt_message + " on topic " + args.mqtt_topic);
-         client.end();
-      });
+      if (connectedClient == null) {
+         var client = mqtt.connect(getBrokerURL(), getConnectOptions());
+         client.on('connect', function () {
+            client.publish(args.mqtt_topic, args.mqtt_message, function() {
+               writelog("send " + args.mqtt_message + " on topic " + args.mqtt_topic);
+               client.end();
+            });
+         });
+      } else {
+         connectedClient.publish(args.mqtt_topic, args.mqtt_message, function() {
+            writelog("send " + args.mqtt_message + " on topic " + args.mqtt_topic);
+         });
+      }
       callback( null, true ); // we've fired successfully
    });
 }
