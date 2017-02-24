@@ -1,12 +1,12 @@
 {
-   "id": "nl.scanno.owntracks",
+   "id": "nl.scanno.mqtt",
    "name": {
-      "en": "Owntracks Client",
-      "nl": "Owntracks Client"
+      "en": "MQTT Client",
+      "nl": "MQTT Client"
    },
    "description": {
-      "en": "Subscripe to Owntracks MQTT messages for presence detection",
-      "nl": "Abonneer op MQTT berichten van Owntracks voor aanwezigheids detectie"
+      "en": "Subscripe to MQTT topics",
+      "nl": "Abonneer op MQTT topics"
    },
    "version": "0.3.8",
    "compatibility": "1.x",
@@ -36,17 +36,17 @@
    "flow": {
       "triggers": [
          {
-            "id": "eventOwntracks",
+            "id": "eventMQTT",
             "title": {
-               "en": "Receive Geofence triggers",
-               "nl": "Ontvang Geofence triggers"
+               "en": "Receive topic triggers",
+               "nl": "Ontvang topic triggers"
             },
             "tokens": [
                {
-                  "name": "event",
+                  "name": "message",
                   "title": {
-                     "en": "Type of event (enter or leave)",
-                     "nl": "Type gebeurtenis (enter / leave)"
+                     "en": "Message received from topic",
+                     "nl": "Bericht ontvangen via topic"
                   }
                }
             ],
@@ -57,64 +57,6 @@
 	          "placeholder": {
 	             "en": "Topic",
 	             "nl": "Topic"
-	           }
-	       },
-	       {
-	           "name": "nameGeofence",
-	           "type": "text",
-	           "placeholder": {
-	              "en": "Geofence name",
-	              "nl": "Naam Geofence"
-	           }
-	       }
-            ]
-         },
-         {
-            "id": "enterGeofence",
-            "title": {
-               "en": "Enter Geofence trigger",
-               "nl": "Geofence binnen gegaan trigger"
-            },
-            "args":[
-	       {
-	          "name": "mqttTopic",
-	          "type": "text",
-	          "placeholder": {
-	             "en": "Topic",
-	             "nl": "Topic"
-	           }
-	       },
-	       {
-	           "name": "nameGeofence",
-	           "type": "text",
-	           "placeholder": {
-	              "en": "Geofence name",
-	              "nl": "Naam Geofence"
-	           }
-	       }
-            ]
-         },
-         {
-            "id": "leaveGeofence",
-            "title": {
-               "en": "Leave Geofence trigger",
-               "nl": "Geofence verlaten trigger"
-            },
-            "args":[
-	       {
-	          "name": "mqttTopic",
-	          "type": "text",
-	          "placeholder": {
-	             "en": "Topic",
-	             "nl": "Topic"
-	           }
-	       },
-	       {
-	           "name": "nameGeofence",
-	           "type": "text",
-	           "placeholder": {
-	              "en": "Geofence name",
-	              "nl": "Naam Geofence"
 	           }
 	       }
             ]

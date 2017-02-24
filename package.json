@@ -1,7 +1,7 @@
 {
-  "name": "nl.scanno.owntracks",
+  "name": "nl.scanno.mqtt",
   "version": "0.3.8",
-  "description": "Owntracks Client",
+  "description": "MQTT Client",
   "main": "app.js",
   "dependencies": {
     "mqtt": "^1.7.2"
@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/scanno/nl.scanno.owntracks.git"
+    "url": "git+https://github.com/scanno/nl.scanno.mqtt.git"
   },
   "keywords": [
     "Owntracks",
@@ -21,6 +21,6 @@
   "author": "Menno van Grinsven",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/scanno/nl.scanno.owntracks/issues"
+    "url": "https://github.com/scanno/nl.scanno.mqtt/issues"
   }
 }
