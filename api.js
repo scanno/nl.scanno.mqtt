@@ -1,5 +1,5 @@
 module.exports = [{
-   description:	'Test Owntracks connection',
+   description:	'Test MQTT connection',
    method:      'POST',
    path:        '/test/broker/',
    requires_authorization: true,
