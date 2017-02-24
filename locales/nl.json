@@ -1,13 +1,13 @@
 {
     "settings" : {
         "app" : {
-            "title" : "Owntracks client instellingen",
+            "title" : "MQTT client instellingen",
             
             "server" : {
-                "server_title" : "Owntracks broker instellingen",
+                "server_title" : "MQTT broker instellingen",
                 "public_broker" : "Gebruik HiveMQ publieke broker", 
                 "server_details" : "Voer broker gegevens in",
-                "server_explanation" : "Er moet een broker opgegeven worden, waarmee de Owntracks client kan verbinden. De servernaam kan een IP adres bevatten, of een DNS naam. Er moet ook een poortnummer worden opgegeven. Normaal gesproken is dat poort 1883 voor een normale verbinding en poortnummer 8883 voor een beveiligde verbinding.",
+                "server_explanation" : "Er moet een broker opgegeven worden, waarmee de MQTT client kan verbinden. De servernaam kan een IP adres bevatten, of een DNS naam. Er moet ook een poortnummer worden opgegeven. Normaal gesproken is dat poort 1883 voor een normale verbinding en poortnummer 8883 voor een beveiligde verbinding.",
                 "url" : "IP adres of DNS",
                 "port" : "Poortnummer",
                 "tls" : "Gebruik een beveiligde verbinding met de broker (TLS)",
@@ -15,13 +15,6 @@
                 "password" : "Wachtwoord"
             },
             
-            "client" : {
-                "accuracy" : "Minimale nauwkeurigheid",
-                "accuracy_explanation" : "Het kan soms voorkomen dat de lokatie bepaling niet nauwkeurig is (bijvoorbeeld meer dan 50 meter). Dit kan een ongewenste melding opleveren met betrekking tot het binnengaan of verlaten van een geofence. Als de nauwkeurigheid boven de gestelde waard uitkomt, wordt de ontvangen melding genegeerd.",
-                "topic" : "Standaard topic",
-                "topic_explanation" : "De opgegeven topic wordt als standaard topic gebruikt indien in een trigger card geen topic is ingevoerd. Standaard worde owntracks/+/+/event gebruikt."
-            },
-                        
             "button" : {
                 "save" : "Opslaan",
                 "test" : "Test",

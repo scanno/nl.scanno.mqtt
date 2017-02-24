@@ -1,13 +1,13 @@
 {
     "settings" : {
         "app" : {
-            "title" : "Owntracks client settings",
+            "title" : "MQTT client settings",
             
             "server" : {
-                "server_title" : "Owntracks broker setings",
+                "server_title" : "MQTT broker setings",
                 "public_broker" : "Use HiveMQ public broker",
                 "server_details" : "Enter broker details",
-                "server_explanation" : "You need to specify a broker where the Owntracks client can connect to. The servername can either be a local ip adres when using a private broker, or a FQDN. You also need to provide the portnumber. Normally this would be port 1883 and 8883 for secure connections",
+                "server_explanation" : "You need to specify a broker where the MQTT client can connect to. The servername can either be a local ip adres when using a private broker, or a FQDN. You also need to provide the portnumber. Normally this would be port 1883 and 8883 for secure connections",
                 "url" : "Enter IP adress or DNS",
                 "port" : "Enter port number",
                 "tls" : "Use a secure connection to the broker (TLS)",
@@ -15,13 +15,6 @@
                 "password" : "Password for the broker"
             },
             
-            "client" : {
-                "accuracy" : "Enter accuracy in meters",
-                "accuracy_explanation" : "Sometimes the location accuracy can be very low (i.e. accuracy > 50 meters). This could result in an unwanted event regarding enterin / leaving a geofence. If the location accuracy is below the set value, that event is ignored.",
-                "topic" : "Enter the default topic",
-                "topic_explanation" : "The topic specified will be used in trigger cards when the topic argument is left blanc. Default this value will be set to owntracks/+/+/event."
-            },
-                        
             "button" : {
                 "save" : "Save",
                 "test" : "Test",
