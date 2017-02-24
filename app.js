@@ -47,7 +47,7 @@ function receiveMessage(topic, message, args, state) {
 
 
    Homey.manager('flow').trigger('eventMQTT', { message: message.toString() }, { triggerTopic: topic });
-   writelog("Trigger generic card for " + jsonMsg.desc);
+   writelog("Trigger generic card for " + topic);
 }
 
 function getBrokerURL() {
@@ -212,6 +212,7 @@ exports.init = function() {
    }
    Homey.manager('flow').on('trigger.eventMQTT', function( callback, args ){
       clearInterval(myTim)
+   });
 
    listenForMessage()
    listenForAction()
