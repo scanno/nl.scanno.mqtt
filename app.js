@@ -231,26 +231,12 @@ function processMessage (callback, args, state) {
 
 function listenForMessage () {
    // Start listening for the events.
-   Homey.manager('flow').on('trigger.eventOwntracks', processMessage)
-   Homey.manager('flow').on('trigger.enterGeofence', processMessage)
-   Homey.manager('flow').on('trigger.leaveGeofence', processMessage)    
+   Homey.manager('flow').on('trigger.eventMQTT', processMessage)
 }
 
 function getArgs () {
    // Give all the triggers a kick to retrieve the arg(topic) defined on the trigger.
-   Homey.manager('flow').trigger('eventOwntracks', { event: 'Hallo homey' }, { triggerTopic: 'x', triggerFence: 'x' }, function(err, result) {
-      if( err ) {
-         return Homey.error(err)
-     }
-   });
-
-   Homey.manager('flow').trigger('enterGeofence', null, { triggerTopic: 'x', triggerFence: 'x' }, function(err, result) {
-      if( err ) {
-         return Homey.error(err)
-     }
-   });
-
-   Homey.manager('flow').trigger('leaveGeofence', null, { triggerTopic: 'x', triggerFence: 'x' }, function(err, result) {
+   Homey.manager('flow').trigger('eventMQTT', { event: 'Hallo homey' }, { triggerTopic: 'x', triggerFence: 'x' }, function(err, result) {
       if( err ) {
          return Homey.error(err)
      }
@@ -274,20 +260,13 @@ function listenForAction () {
 
 exports.init = function() {
    // get the arguments of any trigger. Once triggered, the interval will stop
-   Homey.log("Owntracks client ready")
+   Homey.log("MQTT client ready")
    var myTim = setInterval(timer, 5000)
    function timer() {
       getArgs()
    }
-   Homey.manager('flow').on('trigger.eventOwntracks', function( callback, args ){
+   Homey.manager('flow').on('trigger.eventMQTT', function( callback, args ){
       clearInterval(myTim)
-   });
-   Homey.manager('flow').on('trigger.enterGeofence', function( callback, args ){
-      clearInterval(myTim)
-   });
-   Homey.manager('flow').on('trigger.leaveGeofence', function( callback, args ){
-      clearInterval(myTim)
-   });
 
    listenForMessage()
    listenForAction()
