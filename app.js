@@ -45,56 +45,9 @@ function receiveMessage(topic, message, args, state) {
    var validJSON = true;
    writelog("received '" + message.toString() + "' on '" + topic + "'");
 
-   // parse the JSON message and put it in an object that we can use
-   try {
-      var jsonMsg = JSON.parse(message.toString());
-   } catch(e) {
-      writelog("Received message is not a valid JSON string");
-      validJSON = false;
-   };
 
-   // owntracks has several different mesages that can be retreived and that should be handeld 
-   // differently. For now we only support the transition message. But prepare for more.
-   // for more information see http://owntracks.org/booklet/tech/json/
-   if (validJSON && jsonMsg._type !== undefined) {
-      switch (jsonMsg._type) {
-         case 'transition':
-            // check the accuracy. If it is too low (i.e a high amount is meters) then perhaps we should skip the trigger
-            if (jsonMsg.acc <= parseInt(Homey.manager('settings').get('accuracy'))) {
-               // The accuracy of location is lower then the treshold value, so the location change will be trggerd
-               writelog("Accuracy is within limits")
-               switch (jsonMsg.event) {
-                  case 'enter':
-                     Homey.manager('flow').trigger('enterGeofence', null, { triggerTopic: topic, triggerFence: jsonMsg.desc });
-                     writelog("Trigger enter card for " + jsonMsg.desc);
-                     break;
-                  case 'leave':
-                     Homey.manager('flow').trigger('leaveGeofence', null, { triggerTopic: topic, triggerFence: jsonMsg.desc });
-                     writelog("Trigger leave card for " + jsonMsg.desc);
-                     break;
-               }
-               Homey.manager('flow').trigger('eventOwntracks', { event: jsonMsg.event }, { triggerTopic: topic, triggerFence: jsonMsg.desc });
-               writelog("Trigger generic card for " + jsonMsg.desc);
-            } else {
-               writelog ("Accuracy is "+ jsonMsg.acc + " and needs to be below " + parseInt(Homey.manager('settings').get('accuracy')))
-            }
-            break;
-         case 'location':
-            // This location object describes the location of the device that published it.
-            writelog("We have received a location message");
-            break;
-         case 'waypoint' :
-            // Waypoints denote specific geographical locations that you want to keep track of. You define a waypoint on the OwnTracks device, 
-            // and OwnTracks publishes this waypoint (if the waypoint is marked shared)
-            writelog("We have received a waypoint message");
-            break;
-         case 'encrypted' :
-            // This payload type contains a single data element with the original JSON object _type (e.g. location, beacon, etc.) encrypted payload in it.
-            break;
-         default:
-            break;
-      }
-   }
+   Homey.manager('flow').trigger('eventMQTT', { message: message.toString() }, { triggerTopic: topic });
+   writelog("Trigger generic card for " + jsonMsg.desc);
 }
 
 function getBrokerURL() {
@@ -164,7 +117,7 @@ function processMessage (callback, args, state) {
          receiveMessage(topic, message, args, state);
       });
    };
-   writelog ("state.topic = " + state.triggerTopic + " topic = " + args.mqttTopic + " state.fence = " + state.triggerFence + " geofence = " + args.nameGeofence)
+   writelog ("state.topic = " + state.triggerTopic + " topic = " + args.mqttTopic )
 
    // MQTT subscription topics can contain "wildcards", i.e a + sign. However the topic returned
    // by MQTT brokers contain the topic where the message is posted on. In that topic, the wildcard
@@ -187,14 +140,6 @@ function processMessage (callback, args, state) {
    // If the topic that triggered me the topic I was waiting for?
    if (matchTopic == true) {
       console.log ("triggerTopic = equal" )
-      // The topic is equal, but we also need the geofence to be equal as well, if not then the 
-      // callback should be false
-      if ( state.triggerFence == args.nameGeofence) {
-         writelog ("triggerFence = equal")
-         callback ( null, true);
-      } else {
-         callback ( null, false);
-      }
       callback( null, true )
    }
    // This is not the topic I was waiting for and it is a known topic
@@ -236,7 +181,7 @@ function listenForMessage () {
 
 function getArgs () {
    // Give all the triggers a kick to retrieve the arg(topic) defined on the trigger.
-   Homey.manager('flow').trigger('eventMQTT', { event: 'Hallo homey' }, { triggerTopic: 'x', triggerFence: 'x' }, function(err, result) {
+   Homey.manager('flow').trigger('eventMQTT', { event: 'Hallo homey' }, { triggerTopic: 'x' }, function(err, result) {
       if( err ) {
          return Homey.error(err)
      }
