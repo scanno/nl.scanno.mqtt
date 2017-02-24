@@ -56,28 +56,6 @@
             </fieldset>
         </fieldset>
 
-        <fieldset id="client_settings">
-            <legend>
-                <label data-i18n="settings.app.client.client_settings"></label>
-            </legend>
-            
-            <p data-i18n="settings.app.client.accuracy_explanation"></p>
-            
-            <div class="field row">
-                <label class="form_label" for="Accuracy" data-i18n="settings.app.client.accuracy"></label>
-                <br>
-                <input class="form_input" id="accuracy" type="text" value="100" /> <br>
-            </div>
-            
-<!--            <p data-i18n="settings.app.client.topic_explanation"></p>
-           
-            <div class="field row">
-                <label class="form_label" for="topic" data-i18n="settings.app.client.topic"></label>
-                <br>
-                <input class="form_input" id="topic" type="text" value="owntracks/+/+/event" /> <br>
-            </div>
--->            
-        </fieldset>
         </form>
 
         <p data-i18n="settings.app.log.title"></p>
@@ -147,23 +125,6 @@
                     currentValues.password = password;
                   }
            })
-           Homey.get('accuracy', function(err, accuracy) {
-                  if (err) {
-                    console.error(err)
-                  } else {
-                    document.getElementById('accuracy').value = accuracy;
-                    currentValues.accuracy = accuracy;
-                  }
-           })
-/*           Homey.get('topic', function(err, topic) {
-                  if (err) {
-                    console.error(err)
-                  } else {
-                    document.getElementById('topic').value = topic;
-                    currentValues.topic = topic;
-                  }
-           })
-*/
            Homey.ready();
         }
 
@@ -214,20 +175,6 @@
                 currentValues.password = document.getElementById('password').value;
             }
 
-            if (currentValues.accuracy != document.getElementById('accuracy').value) {
-                console.log("accuracy has been changed");
-                Homey.set('accuracy', document.getElementById('accuracy').value);
-                valuesHaveBeenChanged = true;
-                currentValues.accuracy = accuracy;
-            }
-
-/*            if (currentValues.topic !=  document.getElementById('topic').value) {
-                console.log("topic has been changed");
-                Homey.set('topic', document.getElementById('topic').value);
-                valuesHaveBeenChanged = true;
-                currentValues.topic = document.getElementById('topic').value;
-            }
-*/
             if (valuesHaveBeenChanged == true) {
                 notifySettings(oldValues);
                 Homey.alert(__('settings.app.messages.settings_saved'));
