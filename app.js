@@ -194,20 +194,20 @@ function getArgs () {
 
 function listenForAction () {
    writelog("listenFirAction called")
-   Homey.manager('flow').on('action.pub_mqtt_message', function( callback, args ){
+   Homey.manager('flow').on('action.publishMQTT', function( callback, args ){
       writelog("Send flow triggered");
       // Read the URL from the settings.
       if (connectedClient == null) {
          var client = mqtt.connect(getBrokerURL(), getConnectOptions());
          client.on('connect', function () {
-            client.publish(args.mqtt_topic, args.mqtt_message, function() {
-               writelog("send " + args.mqtt_message + " on topic " + args.mqtt_topic);
+            client.publish(args.mqttTopic, args.mqttMessage, function() {
+               writelog("send " + args.mqttMessage + " on topic " + args.mqttTopic);
                client.end();
             });
          });
       } else {
-         connectedClient.publish(args.mqtt_topic, args.mqtt_message, function() {
-            writelog("send " + args.mqtt_message + " on topic " + args.mqtt_topic);
+         connectedClient.publish(args.mqttTopic, args.mqttMessage, function() {
+            writelog("send " + args.mqttMessage + " on topic " + args.mqttTopic);
          });
       }
       callback( null, true ); // we've fired successfully
