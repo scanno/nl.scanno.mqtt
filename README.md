@@ -1,34 +1,13 @@
-# Owntracks MQTT Client for Homey
+# MQTT Client for Homey
 
-This app is based on the MQTT Client for Homey made by Johan Kuster.
+This app was initially based on the MQTT Client for Homey made by Johan Kuster.
 
-Owntracks is an open source location app for Android and iOS. It sends location information to a MQTT broker.
-This can be a private MQTT broker you are hosting yourself, or a public MQTT broker. The Owntracks app does not
-use a lot of battery (at least on my Android phone).
-The Owntracks apps have an integrated option to connect to the owntracks public MQTT broker, but this cannot be
-used with this client. This is due to the fact that a random userid is generated. However there are several other
-public MQTT brokers available. I have tested with broker.hivemq.com.
+With this app you will be able to send messages to a topic and receive messages from a topic.
 
-USING A PUBLIC MQTT BROKER HAS SECURITY IMPLICATIONS. EVERYONE CAN SEE YOUR MESSAGES.
+The app contains two cards. One for subscribing to a topic and receiving messages from that topic.
+With the other card you will be ablr to send a message to a topic.
 
-How does this work and what can it do on Homey?
-In the Owntracks app you can add geofences, and Owntracks sends events to the broker containing information about
-entering or leaving a geofence. These events can be used with trigger cards in Homey flows.
-And as such it can be used for presence detection.
-
-The Owntracks app sends its data to a MQTT topic on the broker. This topic is different for each user and each device.
-A typical topic name would be: owntracks/<user-id>/<device-name>/event
-The trailing event means that only events regarding geofences will be received by the Homey client. In the Owntracks 
-clients, you can find out what topic is used to send the messages to (do not forget to add event to that topic).
-Besides subscribing to the MQTT topic, you have to enter the name of the geofence you specified in the Owntracks Android
-or iOS app (regions section). Make sure you enbale the share option. Otherwise the name of the geofence is not included in
-the message and the trigger will not fire.
-
-This app supports the following trigger cards:
-- a card that will trigger when entering the specified geofence
-- a card that will trigger when leaving the specified geofence
-- a card that will trigger on a enter / leave event on the specified geofence. This card provides a tag that contains 
-  the event (i.e. the values can be enter or leave)
+Wildcards in a topic are supported.
 
 The settings page contains:
 - The option to use the HiveMQ public broker
@@ -37,39 +16,6 @@ The settings page contains:
 - The option to use a secure session (TLS). No support for self signed certificates.
 - Userid for the broker connection
 - Password to use for the broker connection
-- The ability to specify the loaction accuracy in meters. Default is set at 100 meters. If the accuracy is worse than
-  100 meters, the received event will be ignored.
 
-Changes in version 0.3.8
-- Set compatibility to support 1.x
-
-Changes in version 0.3.7:
-- Hopefully fixed crash when first time installed and change settings.
-
-Changes in version 0.3.6:
-- Added an option to view the last 20 loglines
-
-Changes in version 0.3.5:
-- Solve settings save crash
-- Solved crash due to receiving non JSON message
-- Update MQTT node library to latest version
-
-Changes in version 0.3.0:
-- Finally solved the multi triggering
-- Connect options solved (userid and password)
-
-Changes in version 0.2.0:
-- Better JSON parsing
-- Better topic handling
-- Accuracy added
-- TLS support
-- No need to reboot after setting or changing broker settings
-- Fixed the accumulating event triggering
-
-What works:
-
-* Multiple topics, triggers can be used
-* The same topic can be used more than once
-* works for Mosquitto MQTT broker but probably also for any other broker that supports MQTT.
-
+# You need access to a MQTT brokerto br abe to use this app.
 

@@ -8,7 +8,7 @@
       "en": "Subscripe to MQTT topics",
       "nl": "Abonneer op MQTT topics"
    },
-   "version": "0.3.8",
+   "version": "0.5.0",
    "compatibility": "1.x",
    "category": [
       "internet"
