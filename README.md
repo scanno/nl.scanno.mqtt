@@ -17,5 +17,5 @@ The settings page contains:
 - Userid for the broker connection
 - Password to use for the broker connection
 
-# You need access to a MQTT brokerto br abe to use this app.
+# You need access to a MQTT broker to be abe to use this app.
 
