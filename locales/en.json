@@ -11,6 +11,7 @@
                 "url" : "Enter IP adress or DNS",
                 "port" : "Enter port number",
                 "tls" : "Use a secure connection to the broker (TLS)",
+                "selfsigned" : "Disable certificate checking (by use of selfsigned certificates",
                 "username" : "Username for the broker",
                 "password" : "Password for the broker"
             },

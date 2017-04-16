@@ -11,6 +11,7 @@
                 "url" : "IP adres of DNS",
                 "port" : "Poortnummer",
                 "tls" : "Gebruik een beveiligde verbinding met de broker (TLS)",
+                "selfsigned" : "Schakel de certificaat controle uit ( bij gebruik van self signed cerificates)",
                 "username" : "Gebruikersnaam",
                 "password" : "Wachtwoord"
             },

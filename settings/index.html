@@ -42,6 +42,11 @@
                     <label class="form_label" for="tls" data-i18n="settings.app.server.tls"></label>
                 </div>
 
+                <div class="field">
+                    <input class="checkbox" id="selfsigned" type="checkbox"/>
+                    <label class="form_label" for="selfsigned" data-i18n="settings.app.server.selfsigned"></label>
+                </div>
+
                 <div class="field row">
                     <label class="form_label" for="User" data-i18n="settings.app.server.username"></label>
                     <br>
@@ -108,6 +113,16 @@
                   document.getElementById('tls').checked = tls;
                   currentValues.tls = tls;
            })
+           Homey.get('selfsigned', function(err, selfsigned) {
+                  if (err) {
+                    console.error(err)
+                  } else {
+                    document.getElementById('selfsigned').value = tls;
+                  }
+                  if (typeof selfsigned == 'undefined' || tls == null) tls = false;
+                  document.getElementById('selfsigned').checked = selfsigned;
+                  currentValues.selfsigned = selfsigned;
+           })
 
            Homey.get('user', function(err, user) {
                   if (err) {
@@ -161,6 +176,13 @@
                 currentValues.tls = document.getElementById('tls').checked;
             }
 
+            if (currentValues.selfsigned != document.getElementById('selfsigned').checked) {
+                console.log("selfsigned has been changed");
+                Homey.set('selfsigned', document.getElementById('selfsigned').checked);
+                valuesHaveBeenChanged = true;
+                currentValues.selfsigned = document.getElementById('selfsigned').checked;
+            }
+
             if (currentValues.user != document.getElementById('user').value) {
                 console.log("user has been changed");
                 Homey.set('user', document.getElementById('user').value);
@@ -204,6 +226,7 @@
                  "url" : url,
                  "ip_port" : ip_port,
                  "tls" : tls,
+                 "selfsigned" : selfsigned,
                  "user" : user,
                  "password" : password
                  }, function(err, result) {
