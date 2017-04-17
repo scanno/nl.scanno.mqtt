@@ -14,8 +14,14 @@ The settings page contains:
 - IP adres or DNS name of the broker wehre to connect top
 - Portnumber to connect to.
 - The option to use a secure session (TLS). No support for self signed certificates.
+- Possibility to bypass certificate check in case of self-signed certificates
 - Userid for the broker connection
 - Password to use for the broker connection
 
 # You need access to a MQTT broker to be able to use this app.
+
+
+**If you like this app, then consider to buy me a beer :)**
+
+[![](https://www.paypalobjects.com/en_US/NL/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=scanno71%40gmail%2ecom&lc=NL&item_name=Homey%20MQTT%20%2f%20Owntracks%20apps&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted)
 
