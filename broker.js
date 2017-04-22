@@ -1,4 +1,4 @@
-var mqtt      = require("mqtt");
+var mqtt      = require("mqtt/node_modules/mqtt");
 var globalVar = require("./global.js");
 var logmodule = require("./logmodule.js");
 var handleMessage = require("./messagehandling.js");
