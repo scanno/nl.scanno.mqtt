@@ -69,6 +69,14 @@ function connectToBroker(args, state) {
       logmodule.writelog("connectedClient == null");
       connectedClient = mqtt.connect(getBrokerURL(), getConnectOptions());
 
+      // On connection ...
+      connectedClient.on('connect', function (connack) {
+         logmodule.writelog("MQTT client connected");
+         logmodule.writelog("Connected Topics: " + globalVar.getTopicArray());
+         logmodule.writelog("reconnectedClient " + reconnectClient);
+//         connectedClient.subscribe(topicName)
+      });
+
       connectedClient.on('reconnect', function() {
          logmodule.writelog("MQTT Reconnect");
          reconnectClient = true;
@@ -101,16 +109,10 @@ function subscribeToTopic(topicName) {
 
       // Fill the array with known topics so I can check if I need to subscribe
       globalVar.getTopicArray().push(topicName);
-
-      // On connection ...
-      connectedClient.on('connect', function (connack) {
-         logmodule.writelog("MQTT client connected");
-         logmodule.writelog("Connected Topics: " + globalVar.getTopicArray());
-         logmodule.writelog("reconnectedClient " + reconnectClient);
-
-         connectedClient.subscribe(topicName)
-         logmodule.writelog("waiting "+ topicName );
-      });
+      if (connectedClient == null) {
+         connectToBroker();
+      }
+      connectedClient.subscribe(topicName);
    }
 }
 
