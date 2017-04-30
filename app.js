@@ -69,18 +69,55 @@ function getArgs () {
    });
 }
 
+function setArgumentChangeEvent() {
+   // We need to know when an argument in a trigger has changed, has been added or removed.
+   // If so, we need to change, remove or add topic subscriptions. So register to the 
+   // trigger update event.
+   Homey.manager('flow').on('trigger.eventMQTT.update', function( callback ) {
+      logmodule.writelog("Trigger changed" );
+
+      // get the new arguments
+      Homey.manager('flow').getTriggerArgs('eventMQTT', function( err, args ) {
+         logmodule.writelog("topics:" + globalVar.getTopicArray());
+
+         // Check if there are already subscribed topics. If so, then unsubsribe because we 
+         // need to loop through all triggers and just unsubscribe and re-subscribe again is faster.
+         if (globalVar.getTopicArray().length > 0) {
+            broker.getConnectedClient().unsubscribe(globalVar.getTopicArray());
+            globalVar.clearTopicArray();
+         };
+         // `args` is an array of trigger objects, one entry per flow
+         args.forEach(function(element) {
+            logmodule.writelog("Trigger Arguments: " + element.mqttTopic);
+            if (broker.getConnectedClient() == null) {
+               broker.connectToBroker();
+            }
+            broker.subscribeToTopic(element.mqttTopic);
+         });
+         getArgs();
+         logmodule.writelog("topics:" + globalVar.getTopicArray());
+      });
+
+      // always fire the callback, it's reserved for future argument validation
+      callback( null, true );
+   });
+}
+
 exports.init = function() {
    // get the arguments of any trigger. Once triggered, the interval will stop
    Homey.log("MQTT client ready")
-   var myTim = setInterval(timer, 5000)
+
+/*   var myTim = setInterval(timer, 5000)
    function timer() {
       getArgs()
    }
    Homey.manager('flow').on('trigger.eventMQTT', function( callback, args ){
       clearInterval(myTim)
    });
-
-   listenForMessage()
+*/   
+   getArgs();
+   listenForMessage();
+   setArgumentChangeEvent();
    actions.registerActions();
 }
 
