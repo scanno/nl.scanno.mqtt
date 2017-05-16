@@ -13,7 +13,9 @@
                 "tls" : "Gebruik een beveiligde verbinding met de broker (TLS)",
                 "selfsigned" : "Schakel de certificaat controle uit ( bij gebruik van self signed cerificates)",
                 "username" : "Gebruikersnaam",
-                "password" : "Wachtwoord"
+                "password" : "Wachtwoord",
+                "custom_clientid": "Geef zelf een eigen Client ID op welke wordt gebruikt bij de verbinding met de broker.",
+                "clientid" : "Client ID"
             },
             
             "button" : {

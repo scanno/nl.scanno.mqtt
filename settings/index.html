@@ -58,6 +58,20 @@
                      <br>
                      <input class="form_input" id="password" type="password" value="" /> <br>
                 </div>
+
+                <div class="field">
+                   <input class="checkbox" id="custom_clientid" type="checkbox" checked="false"
+                      onchange="owntracks.clientid.disabled = !checked">
+                   <label class="form_label" for="custom_clientid" data-i18n="settings.app.server.custom_clientid"</label>
+               </div>
+
+               <div class="field row">
+                   <label class="form_label" for="clientid" data-i18n="settings.app.server.clientid"></label>
+                   <br>
+                   <input class="form_input" id="clientid" type="text" value="" /> <br>
+               </div>
+
+
             </fieldset>
         </fieldset>
 
@@ -117,9 +131,9 @@
                   if (err) {
                     console.error(err)
                   } else {
-                    document.getElementById('selfsigned').value = tls;
+                    document.getElementById('selfsigned').value = selfsigned;
                   }
-                  if (typeof selfsigned == 'undefined' || tls == null) tls = false;
+                  if (typeof selfsigned == 'undefined' || selfsigned == null) selfsigned = false;
                   document.getElementById('selfsigned').checked = selfsigned;
                   currentValues.selfsigned = selfsigned;
            })
@@ -140,6 +154,26 @@
                     currentValues.password = password;
                   }
            })
+           Homey.get('custom_clientid', function(err, custom_clientid) {
+                  if (err) {
+                    console.error(err)
+                  } else {
+                    document.getElementById('custom_clientid').value = custom_clientid;
+                  }
+                  if (typeof custom_clientid == 'undefined' || custom_clientid == null) custom_clientid = false;
+                  document.getElementById('custom_clientid').checked = custom_clientid;
+                  document.getElementById('clientid').disabled = !custom_clientid;
+                  currentValues.custom_clientid = custom_clientid;
+           })
+           Homey.get('clientid', function(err, clientid) {
+                  if (err) {
+                    console.error(err)
+                  } else {
+                    document.getElementById('clientid').value = clientid;
+                    currentValues.clientid = clientid;
+                  }
+           })
+
            Homey.ready();
         }
 
@@ -195,6 +229,20 @@
                 Homey.set('password', document.getElementById('password').value);
                 valuesHaveBeenChanged = true;
                 currentValues.password = document.getElementById('password').value;
+            }
+            
+            if (currentValues.custom_clientid != document.getElementById('custom_clientid').checked) {
+                console.log("custom_clientid has been changed");
+                Homey.set('custom_clientid', document.getElementById('custom_clientid').checked);
+                valuesHaveBeenChanged = true;
+                currentValues.custom_clientid = document.getElementById('custom_clientid').checked;
+            }
+
+            if (currentValues.clientid != document.getElementById('clientid').value) {
+                console.log("clientid has been changed");
+                Homey.set('clientid', document.getElementById('clientid').value);
+                valuesHaveBeenChanged = true;
+                currentValues.clientid = document.getElementById('clientid').value;
             }
 
             if (valuesHaveBeenChanged == true) {
