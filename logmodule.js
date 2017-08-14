@@ -1,12 +1,14 @@
+const Homey = require('homey');
 
 var logArray = [];
+const DEBUG = true;
 
 module.exports = {
-   writelog: function(line) {
-      writelog(line);
+   writelog: function(level, line) {
+      writelog(level, line);
    },
-   getLogLines: function(callback, args) {
-      getLogLines(callback, args);
+   getLogLines: function() {
+      return getLogLines();
    }
 }
 
@@ -34,18 +36,32 @@ function getDateTime() {
     return year + month + day + "-" + hour + ":" + min + ":" + sec;
 }
 
-function writelog(line) {
-   var logLine = getDateTime() + "   " + line;
-   console.log( logLine );
+function writelog(level, line) {
 
-   if (logArray.length >= 20) {
-      logArray.shift();
+   switch(level) {
+      case 'error':
+         Homey.ManagerNotifications.registerNotification({
+            excerpt: line
+         }, function( err, notification ) {
+            if( err ) return console.error( err );
+               if (DEBUG) console.log( 'Notification added' );
+         });
+      case 'debug':
+         if (DEBUG == false) break;
+      case 'info':   
+         var logLine = getDateTime() + "   " + line;
+         console.log( logLine );
+
+         if (logArray.length >= 50) {
+            logArray.shift();
+         }
+         logArray.push(logLine);
+         break;
    }
-   logArray.push(logLine);
 }
 
-function getLogLines(callback, args) {
-   writelog("getLogLines called");
-   callback ( false, logArray);
+function getLogLines() {
+   writelog('debug', "getLogLines called");
+   return logArray;
 }
 

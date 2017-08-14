@@ -1,5 +1,9 @@
+"use strict";
+const Homey = require('homey');
+
 var globalVar = require("./global.js");
 var logmodule = require("./logmodule.js");
+var triggers  = require("./triggers.js");
 
 module.exports = {
    receiveMessage: function(topic, message, args, state) {
@@ -9,9 +13,17 @@ module.exports = {
 
 function receiveMessage(topic, message, args, state) {
    var validJSON = true;
-   logmodule.writelog("received '" + message.toString() + "' on '" + topic + "'");
+   logmodule.writelog('info', "received '" + message.toString() + "' on '" + topic + "'");
 
-   Homey.manager('flow').trigger('eventMQTT', { message: message.toString() }, { triggerTopic: topic });
-   logmodule.writelog("Trigger generic card for " + topic);
+   let tokens = {
+      message: message.toString()
+   }
+   
+   let triggerstate = {
+      triggerTopic: topic, 
+   }
+   
+   triggers.getEvenMQTT().trigger(tokens, triggerstate, null)
+//   Homey.manager('flow').trigger('eventMQTT', { message: message.toString() }, { triggerTopic: topic });
+   logmodule.writelog('info', "Trigger generic card for " + topic);
 }
-

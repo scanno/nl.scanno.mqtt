@@ -1,14 +1,16 @@
+const Homey = require('homey');
+
 module.exports = [{
    description:	'Test MQTT connection',
    method:      'POST',
    path:        '/test/broker/',
    requires_authorization: true,
    role: 'owner',
-   fn: function(callback, args) {
-      Homey.log("");
-      Homey.log("API: Incoming POST on /set/broker/");
-      Homey.app.testBroker(callback, args);
-      callback(callback, args);
+   fn: function(args, callback) {
+      console.log("API: Incoming POST on /set/broker/");
+      var result = Homey.app.testBroker(args);
+      if( result instanceof Error ) callback( result );
+      callback( null, result );
    }
 },
 {
@@ -17,11 +19,11 @@ module.exports = [{
    path:        '/test/settingschange/',
    requires_authorization: true,
    role: 'owner',
-   fn: function(callback, args) {
-      Homey.log("");
-      Homey.log("API: Incoming POST on /test/settingschange/");
-      Homey.app.changedSettings(callback, args);
-      callback(callback, args);
+   fn: function(args, callback) {
+      console.log("API: Incoming POST on /test/settingschange/");
+      var result = Homey.app.changedSettings(args);
+      if( result instanceof Error ) callback( result );
+      callback( null, result );
    }
 },
 {
@@ -30,11 +32,10 @@ module.exports = [{
    path:        '/test/getloglines/',
    requires_authorization: true,
    role: 'owner',
-   fn: function(callback, args) {
-      Homey.log("");
-      Homey.log("API: Incoming POST on /test/getloglines/");
-      Homey.app.getLogLines(callback, args);
-      callback(callback, args);
+   fn: function(args, callback) {
+      console.log.log("API: Incoming POST on /test/getloglines/");
+      var result = Homey.app.getLogLines(args);
+      callback(null, result);
    }
 
 }]

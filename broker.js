@@ -1,3 +1,5 @@
+const Homey     = require('homey');
+
 var mqtt      = require("mqtt/node_modules/mqtt");
 var globalVar = require("./global.js");
 var logmodule = require("./logmodule.js");
@@ -28,44 +30,44 @@ module.exports = {
 function getBrokerURL() {
    var urlBroker = []
     
-   if (Homey.manager('settings').get('otbroker') == true) {
+   if (Homey.ManagerSettings.get('otbroker') == true) {
       urlBroker.push("mqtt://");
       urlBroker.push("broker.hivemq.com:1883");
    } else {
-      if (Homey.manager('settings').get('tls') == true) {
+      if (Homey.ManagerSettings.get('tls') == true) {
         urlBroker.push("mqtts://");
       } else {
          urlBroker.push("mqtt://");
       };
-      urlBroker.push(Homey.manager('settings').get('url'));
-      urlBroker.push(":"+Homey.manager('settings').get('ip_port'));
+      urlBroker.push(Homey.ManagerSettings.get('url'));
+      urlBroker.push(":"+Homey.ManagerSettings.get('ip_port'));
    }
-   logmodule.writelog("Broker URL: "+ urlBroker.join(''));
+   logmodule.writelog('info', "Broker URL: "+ urlBroker.join(''));
    return urlBroker.join('');
 }
 
 function getConnectOptions() {
 
-  if (Homey.manager('settings').get('otbroker') == true) {
+  if (Homey.ManagerSettings.get('otbroker') == true) {
       return null;
    } else {
       var clientID = 'homey_' + Math.random().toString(16).substr(2, 8);
       var rejectUnauth = "true";
-      if ( Homey.manager('settings').get('selfsigned') == true) {
+      if ( Homey.ManagerSettings.get('selfsigned') == true) {
          rejectUnauth = "false";
       }
-      if ( Homey.manager('settings').get('custom_clientid') == true) {
-         clientID = Homey.manager('settings').get('clientid');
+      if ( Homey.ManagerSettings.get('custom_clientid') == true) {
+         clientID = Homey.ManagerSettings.get('clientid');
       }
-      logmodule.writelog("clientID = "+ clientID);
+      logmodule.writelog('info', "clientID = "+ clientID);
       var connect_options = {
          keepalive: 10,
-         username: Homey.manager('settings').get('user'),
-         password: Homey.manager('settings').get('password'),
+         username: Homey.ManagerSettings.get('user'),
+         password: Homey.ManagerSettings.get('password'),
          rejectUnauthorized: rejectUnauth,
          clientId: clientID
       };
-      logmodule.writelog("rejectUnauthorized: " + connect_options.rejectUnauthorized);
+      logmodule.writelog('info', "rejectUnauthorized: " + connect_options.rejectUnauthorized);
       return connect_options
    };
 }
@@ -77,34 +79,34 @@ function connectToBroker(args, state) {
 
       // On connection ...
       connectedClient.on('connect', function (connack) {
-         logmodule.writelog("MQTT client connected");
-         logmodule.writelog("Connected Topics: " + globalVar.getTopicArray());
-         logmodule.writelog("reconnectedClient " + reconnectClient);
+         logmodule.writelog('info', "MQTT client connected");
+         logmodule.writelog('info', "Connected Topics: " + globalVar.getTopicArray());
+         logmodule.writelog('info', "reconnectedClient " + reconnectClient);
 //         connectedClient.subscribe(topicName)
       });
 
       connectedClient.on('reconnect', function() {
-         logmodule.writelog("MQTT Reconnect");
+         logmodule.writelog('info', "MQTT Reconnect");
          reconnectClient = true;
        });
 
       connectedClient.on('close', function() {
-         logmodule.writelog("MQTT Closed");
+         logmodule.writelog('info', "MQTT Closed");
          reconnectClient = true;
        });
 
       connectedClient.on('offline', function() {
-         logmodule.writelog("MQTT Offline");
+         logmodule.writelog('info', "MQTT Offline");
          reconnectClient = true;
        });
 
       connectedClient.on('error', function(error) {
-         logmodule.writelog("MQTT error occured: " + error);
+         logmodule.writelog('error', "MQTT error occured: " + error);
       });
 
       connectedClient.on('message',function(topic, message, packet) {
          // When a message is received, call receiveMessage for further processing
-         logmodule.writelog("OnMessage called");
+         logmodule.writelog('info', "OnMessage called");
          handleMessage.receiveMessage(topic, message, args, state);
       });
    };
@@ -124,20 +126,21 @@ function subscribeToTopic(topicName) {
 
 function sendMessageToTopic(args) {
    // Check if there is already a connection to the broker
-   logmodule.writelog("SendMessageToTopic called");
+   logmodule.writelog('info', "SendMessageToTopic called");
    if (connectedClient == null) {
       // There is no connection, so create a connection and send the message
       var client = mqtt.connect(getBrokerURL(), getConnectOptions());
       client.on('connect', function () {
+         logmodule.writelog('info', "Broker not connected, attemting connection");
          client.publish(args.mqttTopic, args.mqttMessage, function() {
-            logmodule.writelog("send " + args.mqttMessage + " on topic " + args.mqttTopic);
+            logmodule.writelog('info', "send " + args.mqttMessage + " on topic " + args.mqttTopic);
             client.end();
          });
       });
    } else {
       // There is already a connection, so the message can be send
       connectedClient.publish(args.mqttTopic, args.mqttMessage, function() {
-         logmodule.writelog("send " + args.mqttMessage + " on topic " + args.mqttTopic);
+         logmodule.writelog('info', "send " + args.mqttMessage + " on topic " + args.mqttTopic);
       });
    }
 }

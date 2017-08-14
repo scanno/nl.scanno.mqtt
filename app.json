@@ -8,26 +8,30 @@
       "en": "Subscripe to MQTT topics",
       "nl": "Abonneer op MQTT topics"
    },
-   "version": "1.0.2",
-   "compatibility": "1.x",
+   "version": "2.0.0",
+   "sdk": 2,
+   "compatibility": "1.5",
    "category": [
       "internet"
+   ],
+   "permissions": [
+       "homey:manager:speech-output"
    ],
    "author": {
       "name": "Menno van Grinsven",
       "email": "mgrinsven@gmail.com"
    },
-    "contributors": {
-        "developers": [
-            {
-                "name": "Menno van Grinsven",
-                "email": "mgrinsven@gmail.com"
-            }
-        ]
-    },
+   "contributors": {
+      "developers": [
+         {
+            "name": "Menno van Grinsven",
+            "email": "mgrinsven@gmail.com"
+         }
+      ]
+   },
    "images":{
-     "large":"./assets/images/large.jpg",
-     "small":"./assets/images/small.jpg"
+      "large":"./assets/images/large.jpg",
+      "small":"./assets/images/small.jpg"
    },
    "flow": {
       "triggers": [
@@ -48,16 +52,15 @@
             ],
             "args":[
 	       {
-	          "name": "mqttTopic",
-	          "type": "text",
-	          "placeholder": {
-	             "en": "Topic",
-	             "nl": "Topic"
+	           "name": "mqttTopic",
+	           "type": "text",
+	           "placeholder": {
+	              "en": "Topic",
+	              "nl": "Topic"
 	           }
 	       }
             ]
          }
-
       ],
       "actions": [
          {
@@ -65,26 +68,43 @@
 	    "title": {
 	       "en": "Publish message",
 	       "nl": "Stuur bericht"
-	     },
-             "args":[
-	        {
-	           "name": "mqttMessage",
-	           "type": "text",
-	           "placeholder": {
-	              "en": "Message",
-	              "nl": "Bericht"
-	            }
-	        },
-	        {
-	           "name": "mqttTopic",
-	           "type": "text",
-	           "placeholder": {
-	              "en": "Topic",
-	              "nl": "Topic"
-	           }
-	        }
-             ]
-	  }
+	    },
+            "args":[
+	       {
+	          "name": "mqttMessage",
+	          "type": "text",
+	          "placeholder": {
+	             "en": "Message",
+	             "nl": "Bericht"
+	          }
+	       },
+	       {
+	          "name": "mqttTopic",
+	          "type": "text",
+	          "placeholder": {
+	             "en": "Topic",
+	             "nl": "Topic"
+	          }
+	       }
+            ]
+         },
+         {
+            "id": "sayString",
+            "title": {
+               "en": "Say the received string through homeys speaker",
+               "nl": "Speel de ontvangen string af via homys interne speaker"
+            },
+            "args":[
+               {
+                  "name": "voiceString",
+                  "type": "text",
+                  "placeholder": {
+                     "en": "Received string",
+                     "nl": "Ontvangen string"
+                  }
+               }
+            ]
+         }
       ]
    }
 }
