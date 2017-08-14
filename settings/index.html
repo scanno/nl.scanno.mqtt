@@ -1,7 +1,8 @@
 <!doctype html>
 <html>
     <head>
-
+        <!-- The '/homey.js' script must be included in your settings view to work -->
+        <script type="text/javascript" src="/homey.js" data-origin="settings"></script>
     </head>
     <body>
 
@@ -87,8 +88,11 @@
         <script type="text/javascript">
 
         var currentValues = {};
+        var HomeyAPI = null;
 
-        function onHomeyReady(){
+        function onHomeyReady(Homey){
+           HomeyAPI = Homey;
+
            Homey.get('otbroker', function(err, otbroker) {
                   if (err) {
                     console.error(err)
@@ -184,121 +188,77 @@
 
             if (currentValues.otbroker != document.getElementById('otbroker').checked) {
                 console.log("otbroker has been changed");
-                Homey.set('otbroker', document.getElementById('otbroker').checked);
+                HomeyAPI.set('otbroker', document.getElementById('otbroker').checked);
                 valuesHaveBeenChanged = true;
                 currentValues.otbroker = document.getElementById('otbroker').checked;
             }
 
             if (currentValues.url != document.getElementById('url').value) {
                 console.log("url has been changed");
-                Homey.set('url', document.getElementById('url').value);
+                HomeyAPI.set('url', document.getElementById('url').value);
                 valuesHaveBeenChanged = true;
                 currentValues.url = document.getElementById('url').value;
             }
 
             if (currentValues.ip_port != document.getElementById('ip_port').value) {
                 console.log("ip_port has been changed");
-                Homey.set('ip_port', document.getElementById('ip_port').value);
+                HomeyAPI.set('ip_port', document.getElementById('ip_port').value);
                 valuesHaveBeenChanged = true;
                 currentValues.ip_port = document.getElementById('ip_port').value;
             }
 
             if (currentValues.tls != document.getElementById('tls').checked) {
                 console.log("tls has been changed");
-                Homey.set('tls', document.getElementById('tls').checked);
+                HomeyAPI.set('tls', document.getElementById('tls').checked);
                 valuesHaveBeenChanged = true;
                 currentValues.tls = document.getElementById('tls').checked;
             }
 
             if (currentValues.selfsigned != document.getElementById('selfsigned').checked) {
                 console.log("selfsigned has been changed");
-                Homey.set('selfsigned', document.getElementById('selfsigned').checked);
+                HomeyAPI.set('selfsigned', document.getElementById('selfsigned').checked);
                 valuesHaveBeenChanged = true;
                 currentValues.selfsigned = document.getElementById('selfsigned').checked;
             }
 
             if (currentValues.user != document.getElementById('user').value) {
                 console.log("user has been changed");
-                Homey.set('user', document.getElementById('user').value);
+                HomeyAPI.set('user', document.getElementById('user').value);
                 valuesHaveBeenChanged = true;
                 currentValues.user = document.getElementById('user').value;
             }
 
             if (currentValues.password != document.getElementById('password').value) {
                 console.log("password has been changed");
-                Homey.set('password', document.getElementById('password').value);
+                HomeyAPI.set('password', document.getElementById('password').value);
                 valuesHaveBeenChanged = true;
                 currentValues.password = document.getElementById('password').value;
             }
             
             if (currentValues.custom_clientid != document.getElementById('custom_clientid').checked) {
                 console.log("custom_clientid has been changed");
-                Homey.set('custom_clientid', document.getElementById('custom_clientid').checked);
+                HomeyAPI.set('custom_clientid', document.getElementById('custom_clientid').checked);
                 valuesHaveBeenChanged = true;
                 currentValues.custom_clientid = document.getElementById('custom_clientid').checked;
             }
 
             if (currentValues.clientid != document.getElementById('clientid').value) {
                 console.log("clientid has been changed");
-                Homey.set('clientid', document.getElementById('clientid').value);
+                HomeyAPI.set('clientid', document.getElementById('clientid').value);
                 valuesHaveBeenChanged = true;
                 currentValues.clientid = document.getElementById('clientid').value;
             }
 
             if (valuesHaveBeenChanged == true) {
                 notifySettings(oldValues);
-                Homey.alert(__('settings.app.messages.settings_saved'));
+                HomeyAPI.alert(__('settings.app.messages.settings_saved'));
             } else {
-                Homey.alert(__('settings.app.messages.settings_noSettingsChanged'));
+                HomeyAPI.alert(__('settings.app.messages.settings_noSettingsChanged'));
             }
         }
 
-/*        function test() {
-            console.log("Test function entered");
-            document.getElementById('testresult').innerHTML = __('settings.app.messages.testing');
-            var button_test = document.getElementById('button_test');
-            var button_save = document.getElementById('button_save');
-            button_test.disabled = true;
-            button_save.disabled = true;
-        
-            var otbroker = document.getElementById('otbroker').checked;
-            var tls = document.getElementById('tls').checked
-            var url = document.getElementById('url').value;
-            var ip_port = document.getElementById('ip_port').value;
-            var user = document.getElementById('user').value;
-            var password = document.getElementById('password').value;
-            console.log("Testing settings");
-
-            Homey.api('POST', '/test/broker/', {
-                 "otbroker" : otbroker, 
-                 "url" : url,
-                 "ip_port" : ip_port,
-                 "tls" : tls,
-                 "selfsigned" : selfsigned,
-                 "user" : user,
-                 "password" : password
-                 }, function(err, result) {
-                if (!err) {
-                    console.log("Connetion succesfull");
-                    if (!result) {
-                        document.getElementById('testresult').innerHTML = __('settings.app.messages.settings_success_tested')
-                    } else {
-                        document.getElementById('testresult').innerHTML = __('settings.app.messages.settings_success_tested')
-                        button_save.disabled = true;
-                    }
-                } else {
-                    // Oeps, something went wrong here
-                    Homey.alert(__('settings.app.messages.unable_get_location'));
-                    document.getElementById('testresult').innerHTML = __('settings.app.messages.unable_get_location');
-                    button_test.disabled = false;
-                    button_save.disabled = true;
-                }
-                
-            });
-        }
-*/        
         function notifySettings(values) {
-             Homey.api('POST', 'test/settingschange/', values, function(err, result) {
+             HomeyAPI.api('POST', 'test/settingschange/', values, function(err, result) {
                 if (!err) {
                     console.log("Settings change succesfull");
                 } else {
@@ -310,7 +270,7 @@
         }
 
         function showLogLines() {
-           Homey.api('GET', 'test/getloglines/', function(err, result) {
+           HomeyAPI.api('GET', 'test/getloglines/', function(err, result) {
               if (!err) {
                  document.getElementById('loglines').innerHTML = '';
                  for (var i=0; i < result.length; i++) {
