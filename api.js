@@ -33,7 +33,7 @@ module.exports = [{
    requires_authorization: true,
    role: 'owner',
    fn: function(args, callback) {
-      console.log.log("API: Incoming POST on /test/getloglines/");
+      console.log("API: Incoming POST on /test/getloglines/");
       var result = Homey.app.getLogLines(args);
       callback(null, result);
    }
