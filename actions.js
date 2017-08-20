@@ -1,61 +1,79 @@
 "use strict";
-const Homey = require('homey');
+//const Homey = require('homey');
 
-var globalVar = require("./global.js");
-var logmodule = require("./logmodule.js");
-var broker    = require("./broker.js");
+//var globalVar = require("./global.js");
+//var logmodule = require("./logmodule.js");
+//var broker    = require("./broker.js");
 
-var publishMQTT = null;
-var sayString = null;
+//var publishMQTT = null;
+//var sayString = null;
 
-module.exports = {
+/*module.exports = {
    registerActions: function() {
       registerActions();
    }
 }
+*/
 
-function registerActions() {
-   logmodule.writelog("registerActions called");
-
-   // Put all the action trigger here for registering them and executing the action
+class actionsMQTT {
+   constructor (app) {
+      this.logmodule = app.logmodule;
+      this.globalVar = app.globalVar;
+      this.broker = app.broker;
+      this.publishMQTT = null;
+      this.sayString = null;
+      this.Homey = require('homey');
+      this.OnInit();
+   }
    
-   publishMQTT = new Homey.FlowCardAction('publishMQTT');
-   sayString = new Homey.FlowCardAction('sayString');
+   OnInit() {
+      this.registerActions();
+   }
+   
+   registerActions() {
+      const ref = this;
+      this.logmodule.writelog("registerActions called");
 
-   publishMQTT.register();
-   sayString.register();
+      // Put all the action trigger here for registering them and executing the action
+   
+      this.publishMQTT = new this.Homey.FlowCardAction('publishMQTT');
+      this.sayString = new this.Homey.FlowCardAction('sayString');
 
-   // Put all the action trigger here for registering them and executing the action
-   // Action for sending a message to the broker on the specified topic
-   publishMQTT.registerRunListener((args, state ) => {
-      logmodule.writelog('debug', "Listener publishMQTT called");
+      this.publishMQTT.register();
+      this.sayString.register();
+
+      // Put all the action trigger here for registering them and executing the action
+      // Action for sending a message to the broker on the specified topic
+      this.publishMQTT.registerRunListener((args, state ) => {
+         ref.logmodule.writelog('debug', "Listener publishMQTT called");
+         try {
+            ref.broker.sendMessageToTopic(args);
+            return Promise.resolve( true );
+          } catch(err) {
+            ref.logmodule.writelog('error', "Error in Listener publishMQTT: " +err);
+            return Promise.reject(err);
+          }
+      })
+
+      // Action for speaking out the string recieved from MQTT topic
+      this.sayString.registerRunListener((args, state ) => {
+         ref.logmodule.writelog('debug', "Listener sayString called");
+         try {
+            ref.homeySayString(args);
+          } catch(err) {
+            ref.logmodule.writelog('error', "Error in Listener sayString: " +err);
+          }
+      })
+   }
+
+   homeySayString(args) {
       try {
-         broker.sendMessageToTopic(args);
-         return Promise.resolve( true );
-       } catch(err) {
-         logmodule.writelog('error', "Error in Listener publishMQTT: " +err);
-         return Promise.reject(err);
-       }
-   })
-
-   // Action for speaking out the string recieved from MQTT topic
-   sayString.registerRunListener((args, state ) => {
-      logmodule.writelog('debug', "Listener sayString called");
-      try {
-         homeySayString(args);
-       } catch(err) {
-         logmodule.writelog('error', "Error in Listener sayString: " +err);
-       }
-   })
-
-}
-
-function homeySayString(args) {
-   try {
-      Homey.ManagerSpeechOutput.say(args.voiceString)
-      logmodule.writelog("homeySayString: " +args.voiceString);
-   } catch(err) {
-      logmodule.writelog("homeySayString: " +err);
+         this.Homey.ManagerSpeechOutput.say(args.voiceString)
+         this.logmodule.writelog("homeySayString: " +args.voiceString);
+      } catch(err) {
+         this.logmodule.writelog("homeySayString: " +err);
+      }
    }
 }
 
+module.exports = actionsMQTT;
