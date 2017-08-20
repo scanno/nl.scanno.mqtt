@@ -1,64 +1,60 @@
 "use strict";
 const Homey = require('homey');
 
-var globalVar = require("./global.js");
-var logmodule = require("./logmodule.js");
-var broker    = require("./broker.js");
-var actions   = require("./actions.js");
-var triggers  = require("./triggers.js");
+const globalVarMQTT = require("./global.js");
+//const logmodule = require("./logmodule.js");
+const brokerMQTT    = require("./broker.js");
+const actionsMQTT   = require("./actions.js");
+const triggerMQTT  = require("./triggers.js");
 
+//var globalVar = null;
 
 class MQTTApp extends Homey.App {
-
    /*
       Initialize the Owntracks app. Register all variables,
       Connect to the broker when the broker is used.
       Register triggers, actions and conditions
    */
    onInit() {
-      triggers.listenForMessage();
-//      triggers.getTriggerArgs().then(function()
-triggers.getTriggerArgs();
-         try {
-            triggers.setArgumentChangeEvent();
-            actions.registerActions();
-         } catch(err) {
-            logmodule.writelog('error', "App: " +err);
-         }
-  //    });
+      this.logmodule = require("./logmodule.js");
+      this.globalVar = new globalVarMQTT(this);
+      this.broker = new brokerMQTT(this);
+      this.triggers = new triggerMQTT(this);
+      this.actions = new actionsMQTT(this);
+      
+      this.broker.updateRef(this);
    }
 
    changedSettings(args) {
-      logmodule.writelog("changedSettings called");
-      logmodule.writelog(args.body);
-      logmodule.writelog("topics:" + globalVar.getTopicArray())
+      this.logmodule.writelog("changedSettings called");
+      this.logmodule.writelog(args.body);
+      this.logmodule.writelog("topics:" + this.globalVar.getTopicArray())
 
-      if (globalVar.getTopicArray().length > 0) {
-         broker.getConnectedClient().unsubscribe(globalVar.getTopicArray());
-         globalVar.clearTopicArray();
+      if (this.globalVar.getTopicArray().length > 0) {
+         this.broker.getConnectedClient().unsubscribe(this.globalVar.getTopicArray());
+         this.globalVar.clearTopicArray();
       };
 
-      if (broker.getConnectedClient() !== null) {
-         broker.getConnectedClient().end(true);
+      if (this.broker.getConnectedClient() !== null) {
+         this.broker.getConnectedClient().end(true);
       }
 
-      logmodule.writelog("topics:" + globalVar.getTopicArray());
-      broker.clearConnectedClient();
-      triggers.getTriggerArgs();
+      this.logmodule.writelog("topics:" + this.globalVar.getTopicArray());
+      this.broker.clearConnectedClient();
+      this.triggers.getTriggerArgs();
       return true;
    }
 
    getLogLines() {
-      return logmodule.getLogLines();
+      return this.logmodule.getLogLines();
    }
 
    /*
       getUserArray: Getter for returning the user array to settings.
    */
    getUserArray() {
-      return globalVar.getUserArray();
+      return this.globalVar.getUserArray();
    }
-
 }
 module.exports = MQTTApp;
 
