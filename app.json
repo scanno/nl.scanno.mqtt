@@ -52,40 +52,104 @@
             ],
             "args":[
 	       {
-	           "name": "mqttTopic",
-	           "type": "text",
-	           "placeholder": {
-	              "en": "Topic",
-	              "nl": "Topic"
-	           }
+	          "name": "mqttTopic",
+                  "type": "text",
+                  "placeholder": {
+                     "en": "Topic",
+                     "nl": "Topic"
+                  }
 	       }
             ]
          }
       ],
       "actions": [
          {
-	    "id": "publishMQTT",
-	    "title": {
-	       "en": "Publish message",
-	       "nl": "Stuur bericht"
-	    },
+            "id": "publishMQTT",
+            "title": {
+               "en": "Publish message",
+               "nl": "Stuur bericht"
+            },
             "args":[
-	       {
-	          "name": "mqttMessage",
-	          "type": "text",
-	          "placeholder": {
-	             "en": "Message",
-	             "nl": "Bericht"
-	          }
-	       },
-	       {
-	          "name": "mqttTopic",
-	          "type": "text",
-	          "placeholder": {
-	             "en": "Topic",
-	             "nl": "Topic"
-	          }
-	       }
+               {
+                  "name": "mqttMessage",
+                  "type": "text",
+                  "placeholder": {
+                     "en": "Message",
+                      "nl": "Bericht"
+                  }
+               },
+               {
+                  "name": "mqttTopic",
+                  "type": "text",
+                  "placeholder": {
+                     "en": "Topic",
+                     "nl": "Topic"
+                  }
+               }
+            ]
+         },
+         {
+            "id": "publishMQTT_Adv",
+            "title": {
+               "en": "Publish message",
+               "nl": "Stuur bericht"
+            },
+            "args":[
+               {
+                  "name": "mqttMessage",
+                  "type": "text",
+                  "placeholder": {
+                     "en": "Message",
+                      "nl": "Bericht"
+                  }
+              },
+              {
+                 "name": "mqttTopic",
+                 "type": "text",
+                 "placeholder": {
+                    "en": "Topic",
+                    "nl": "Topic"
+                 }
+              },
+              {
+                 "name": "qos",
+                 "type": "dropdown",
+                 "placeholder": {
+                    "en": "Quality of Service",
+                    "nl": "Quality of Service"
+                 },
+                 "values": [
+                    {
+                       "id": "0",
+                       "label": {
+                          "en": "QoS 0",
+                          "nl": "QoS 0"
+                       }
+                    },
+                    {
+                       "id": "1",
+                       "label": {
+                          "en": "QoS 1",
+                          "nl": "QoS 1"
+                       }
+                    },
+                    {
+                       "id": "2",
+                       "label": {
+                          "en": "QoS 2",
+                          "nl": "QoS 2"
+                       }
+                    }
+                 ]
+              },
+              {
+                 "name": "retain",
+                 "type": "checkbox",
+                 "title": {
+                    "en": "retain",
+                    "nl": "retain"
+                 }
+              }
             ]
          },
          {
@@ -94,7 +158,7 @@
                "en": "Say the received string through homeys speaker",
                "nl": "Speel de ontvangen string af via homys interne speaker"
             },
-            "args":[
+            "args": [
                {
                   "name": "voiceString",
                   "type": "text",

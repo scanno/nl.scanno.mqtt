@@ -34,7 +34,6 @@ class brokerMQTT {
    }
 
    getConnectOptions() {
-
       if (this.Homey.ManagerSettings.get('otbroker') == true) {
          return null;
       } else {
@@ -113,23 +112,43 @@ class brokerMQTT {
 
    sendMessageToTopic(args) {
       const ref = this;
-      // Check if there is already a connection to the broker
-      this.logmodule.writelog('info', "SendMessageToTopic called");
-      if (this.connectedClient == null) {
-         // There is no connection, so create a connection and send the message
-         var client = mqtt.connect(this.getBrokerURL(), this.getConnectOptions());
-         client.on('connect', function () {
-            ref.logmodule.writelog('info', "Broker not connected, attemting connection");
-            client.publish(args.mqttTopic, args.mqttMessage, function() {
-               ref.logmodule.writelog('info', "send " + args.mqttMessage + " on topic " + args.mqttTopic);
-               client.end();
+      this.logmodule.writelog('debug', "SendMessageToTopic: " +JSON.stringify(args));
+      this.logmodule.writelog('debug',"qos: "+ parseInt(args.qos));
+
+      try {
+         if (args.qos == undefined || args.retain == undefined) {
+            var publish_options = {
+               qos: 0,
+               retain: false
+            };
+         } else {
+            var publish_options = {
+               qos: parseInt(args.qos),
+               retain: args.retain
+            };
+         }
+
+         this.logmodule.writelog('debug', "publish_options: " +JSON.stringify(publish_options));
+         // Check if there is already a connection  to the broker
+         this.logmodule.writelog('info', "SendMessageToTopic called");
+         if (this.connectedClient == null) {
+            // There is no connection, so create a connection and send the message
+            var client = mqtt.connect(this.getBrokerURL(), this.getConnectOptions());
+            client.on('connect', function () {
+               ref.logmodule.writelog('info', "Broker not connected, attemting connection");
+               client.publish(args.mqttTopic, args.mqttMessage, publish_options,function() {
+                  ref.logmodule.writelog('info', "send " + args.mqttMessage + " on topic " + args.mqttTopic);
+                  client.end();
+               });
             });
-         });
-      } else {
-         // There is already a connection, so the message can be send
-         ref.connectedClient.publish(args.mqttTopic, args.mqttMessage, function() {
-            ref.logmodule.writelog('info', "send " + args.mqttMessage + " on topic " + args.mqttTopic);
-         });
+         } else {
+            // There is already a connection, so the message can be send
+            ref.connectedClient.publish(args.mqttTopic, args.mqttMessage, publish_options, function() {
+               ref.logmodule.writelog('info', "send " + args.mqttMessage + " on topic " + args.mqttTopic);
+            });
+         }
+      } catch(err) {
+         ref.logmodule.writelog('error', "sendMessageToTopic: " +err);
       }
    }
    

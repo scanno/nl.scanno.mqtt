@@ -37,9 +37,11 @@ class actionsMQTT {
       // Put all the action trigger here for registering them and executing the action
    
       this.publishMQTT = new this.Homey.FlowCardAction('publishMQTT');
+      this.publishMQTT_Adv = new this.Homey.FlowCardAction('publishMQTT_Adv');
       this.sayString = new this.Homey.FlowCardAction('sayString');
 
       this.publishMQTT.register();
+      this.publishMQTT_Adv.register();
       this.sayString.register();
 
       // Put all the action trigger here for registering them and executing the action
@@ -51,6 +53,17 @@ class actionsMQTT {
             return Promise.resolve( true );
           } catch(err) {
             ref.logmodule.writelog('error', "Error in Listener publishMQTT: " +err);
+            return Promise.reject(err);
+          }
+      })
+
+      this.publishMQTT_Adv.registerRunListener((args, state ) => {
+         ref.logmodule.writelog('debug', "Listener publishMQTT_Adv called");
+         try {
+            ref.broker.sendMessageToTopic(args);
+            return Promise.resolve( true );
+          } catch(err) {
+            ref.logmodule.writelog('error', "Error in Listener publishMQTT_Adv: " +err);
             return Promise.reject(err);
           }
       })
