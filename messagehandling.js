@@ -22,7 +22,8 @@ class handlingMQTT {
       this.logmodule.writelog('info', "received '" + message.toString() + "' on '" + topic + "'");
 
       let tokens = {
-         message: message.toString()
+         message: message.toString(),
+         topic: topic
       }
    
       let triggerstate = {

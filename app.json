@@ -48,6 +48,13 @@
                      "en": "Message received from topic",
                      "nl": "Bericht ontvangen via topic"
                   }
+               },
+               {
+                  "name": "topic",
+                  "title": {
+                     "en": "Name Topic",
+                     "nl": "Naam Topic"
+                  }
                }
             ],
             "args":[
