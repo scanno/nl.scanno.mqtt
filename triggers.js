@@ -92,12 +92,18 @@ class triggerMQTT {
       var arrTriggerTopic = state.triggerTopic.split('/');
       var arrMQTTTopic = args.mqttTopic.split('/');
       var matchTopic = true;
+      var hashWildcard = false;
 
       for (var value in arrTriggerTopic) {
+         this.logmodule.writelog('debug', "arrTriggerTopic["+value+"] = "+arrMQTTTopic[value]);
+         if (arrMQTTTopic[value] === '#') {
+            this.logmodule.writelog('debug', "hashWildcard set to true because # detected");
+            hashWildcard = true;
+         }
          if ((arrTriggerTopic[value] !== arrMQTTTopic[value]) && (arrMQTTTopic[value] !== '+')) {
             // This is a bit dirty because it would allow events to be delivered also to topics that do not have
             // the trailing event. In de future, when allowing the other message types, this would cause problems
-            if (arrMQTTTopic[value] !== undefined) {
+            if ((arrMQTTTopic[value] !== undefined) && (hashWildcard == false)) {
                matchTopic = false;
             }
          }
