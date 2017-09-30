@@ -38,21 +38,22 @@ class brokerMQTT {
          return null;
       } else {
          var clientID = 'homey_' + Math.random().toString(16).substr(2, 8);
-         var rejectUnauth = "true";
+         var rejectUnauth = true;
          if ( this.Homey.ManagerSettings.get('selfsigned') == true) {
-            rejectUnauth = "false";
+            rejectUnauth = false;
          }
          if ( this.Homey.ManagerSettings.get('custom_clientid') == true) {
             clientID = this.Homey.ManagerSettings.get('clientid');
          }
          this.logmodule.writelog('info', "clientID = "+ clientID);
-         var connect_options = {
-            keepalive: 10,
-            username: this.Homey.ManagerSettings.get('user'),
-            password: this.Homey.ManagerSettings.get('password'),
-            rejectUnauthorized: rejectUnauth,
-            clientId: clientID
-         };
+
+         var connect_options = {};
+         connect_options.keepalive = 10;
+         connect_options.username = this.Homey.ManagerSettings.get('user');
+         connect_options.password = this.Homey.ManagerSettings.get('password');
+         connect_options.rejectUnauthorized = rejectUnauth;
+         connect_options.clientId = clientID;
+
          this.logmodule.writelog('info', "rejectUnauthorized: " + connect_options.rejectUnauthorized);
          return connect_options
       };
