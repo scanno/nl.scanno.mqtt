@@ -16,7 +16,7 @@ class brokerMQTT {
 
    getBrokerURL() {
       var urlBroker = []
-    
+
       if (this.Homey.ManagerSettings.get('otbroker') == true) {
          urlBroker.push("mqtt://");
          urlBroker.push("broker.hivemq.com:1883");
@@ -88,7 +88,7 @@ class brokerMQTT {
          });
 
          this.connectedClient.on('error', function(error) {
-            ref.logmodule.writelog('error', "MQTT error occured: " + error);
+            ref.logmodule.writelog('info', "MQTT error occured: " + error);
          });
 
          this.connectedClient.on('message',function(topic, message, packet) {
@@ -152,15 +152,15 @@ class brokerMQTT {
          ref.logmodule.writelog('error', "sendMessageToTopic: " +err);
       }
    }
-   
+
    getConnectedClient() {
       return this.connectedClient;
    }
-   
+
    clearConnectedClient() {
       this.connectedClient = null;
    }
-   
+
    updateRef(app) {
       this.handleMessage.updateRef(app);
    }
