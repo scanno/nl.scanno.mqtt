@@ -47,14 +47,16 @@
                   "title": {
                      "en": "Message received from topic",
                      "nl": "Bericht ontvangen via topic"
-                  }
+                  },
+                  "example": "Received message that can contain anything"
                },
                {
                   "name": "topic",
                   "title": {
                      "en": "Name Topic",
                      "nl": "Naam Topic"
-                  }
+                  },
+                  "example": "broker/+/something/#"
                }
             ],
             "args":[
