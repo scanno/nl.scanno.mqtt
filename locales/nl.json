@@ -1,11 +1,18 @@
 {
+  "notifications": {
+     "user_added": "De gebruiker __name__ is aan de gebruikers gegevens toegevoegd",
+     "fence_added": "De geofence __name__ is aan de gebruikers gegevens toegevoegd",
+     "mqtt_offline": "De MQTT broker is ONBESCHIKBAAR",
+     "mqtt_online": "De MQTT broker is weer BESCHIKBAAR"
+  },
+
     "settings" : {
         "app" : {
             "title" : "MQTT client instellingen",
-            
+
             "server" : {
                 "server_title" : "MQTT broker instellingen",
-                "public_broker" : "Gebruik HiveMQ publieke broker", 
+                "public_broker" : "Gebruik HiveMQ publieke broker",
                 "server_details" : "Voer broker gegevens in",
                 "server_explanation" : "Er moet een broker opgegeven worden, waarmee de MQTT client kan verbinden. De servernaam kan een IP adres bevatten, of een DNS naam. Er moet ook een poortnummer worden opgegeven. Normaal gesproken is dat poort 1883 voor een normale verbinding en poortnummer 8883 voor een beveiligde verbinding.",
                 "url" : "IP adres of DNS",
@@ -17,17 +24,17 @@
                 "custom_clientid": "Geef zelf een eigen Client ID op welke wordt gebruikt bij de verbinding met de broker.",
                 "clientid" : "Client ID"
             },
-            
+
             "button" : {
                 "save" : "Opslaan",
                 "test" : "Test",
                 "getlogs" : "Log ophalen"
             },
-            
+
              "log" : {
                 "title" : "Laatste log regels"
             },
-            
+
              "messages" : {
                  "testing" : "Testen, even geduld...",
                  "unable_set_settings" : "Er is een fout opgetreden tijden het opslaan van de instellingen.",

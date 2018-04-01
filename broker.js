@@ -11,7 +11,9 @@ class brokerMQTT {
       this.handleMessage = new handleMQTT(app);
       this.Homey = require('homey');
       this.connectedClient = null;
-      this.reconnectClient = false;
+
+      this.brokerState = "DISCONNECTED";
+      this.errorOccured = false;
    }
 
    getBrokerURL() {
@@ -67,28 +69,46 @@ class brokerMQTT {
 
          // On connection ...
          this.connectedClient.on('connect', function (connack) {
-            ref.logmodule.writelog('info', "MQTT client connected");
-            ref.logmodule.writelog('info', "Connected Topics: " + ref.globalVar.getTopicArray());
-            ref.logmodule.writelog('info', "reconnectedClient " + ref.reconnectClient);
+           ref.brokerState = "CONNECTED";
+           if (ref.errorOccured) {
+             ref.logmodule.writelog('error', ref.Homey.__("notifications.mqtt_online"));
+           }
+           ref.errorOccured = false;
+           ref.logmodule.writelog('info', "MQTT client connected");
+           ref.logmodule.writelog('info', "Connected Topics: " + ref.globalVar.getTopicArray());
+           ref.logmodule.writelog('info', "Broker State: " + ref.brokerState);
          });
 
          this.connectedClient.on('reconnect', function() {
-            ref.logmodule.writelog('info', "MQTT Reconnect");
-            ref.reconnectClient = true;
+           ref.brokerState = "RECONNECTING";
+           ref.logmodule.writelog('info', "MQTT Reconnect");
+           ref.logmodule.writelog('info', "Broker State: " + ref.brokerState);
          });
 
          this.connectedClient.on('close', function() {
-            ref.logmodule.writelog('info', "MQTT Closed");
-            ref.reconnectClient = true;
+           ref.logmodule.writelog('info', "MQTT Closed");
+           ref.brokerState = "DISCONNECTED";
+           ref.logmodule.writelog('info', "Broker State: " + ref.brokerState);
          });
 
          this.connectedClient.on('offline', function() {
-            ref.logmodule.writelog('info', "MQTT Offline");
-            ref.reconnectClient = true;
+           ref.logmodule.writelog('info', "MQTT Offline");
+           if (ref.brokerState == "CONNECTED") {
+             ref.logmodule.writelog('error', ref.Homey.__("notifications.mqtt_offline"));
+           }
+           ref.brokerState = "DISCONNECTED";
+           ref.logmodule.writelog('info', "Broker State: " + ref.brokerState);
          });
 
          this.connectedClient.on('error', function(error) {
-            ref.logmodule.writelog('info', "MQTT error occured: " + error);
+           if (!ref.errorOccured) {
+              ref.logmodule.writelog('error', "MQTT error occured: " + error);
+              ref.brokerState = "ERROR";
+              ref.errorOccured = true;
+              ref.logmodule.writelog('info', "Broker state: " + ref.brokerState);
+           } else {
+              ref.logmodule.writelog('info', "MQTT error occured: " + error);
+           }
          });
 
          this.connectedClient.on('message',function(topic, message, packet) {

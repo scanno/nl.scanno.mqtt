@@ -1,8 +1,13 @@
 {
+  "notifications": {
+     "mqtt_offline": "The MQTT broker is UNAVAILABLE",
+     "mqtt_online": "The MQTT broker is AVAILABLE again"
+  },
+
     "settings" : {
         "app" : {
             "title" : "MQTT client settings",
-            
+
             "server" : {
                 "server_title" : "MQTT broker setings",
                 "public_broker" : "Use HiveMQ public broker",
@@ -18,17 +23,17 @@
                 "clientid" : "Client ID"
 
             },
-            
+
             "button" : {
                 "save" : "Save",
                 "test" : "Test",
                 "getlogs" : "Get logs"
             },
-            
+
              "log" : {
                 "title" : "Log lines:"
             },
-            
+
              "messages" : {
                  "testing" : "Testing, please wait...",
                  "unable_set_settings" : "There was an error trying to apply the settings.",
