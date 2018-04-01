@@ -1,4 +1,4 @@
-"use strict";	
+"use strict";
 //const globalVarMQTT = require("./global.js");
 
 class triggerMQTT {
@@ -34,7 +34,7 @@ class triggerMQTT {
             } else {
                return Promise.resolve( false );
             }
-          } catch(err) {	
+          } catch(err) {
             this.logmodule.writelog('error', "Error in Listener eventMQTT: " +err);
             return Promise.reject(err);
           }
@@ -125,7 +125,7 @@ class triggerMQTT {
    setArgumentChangeEvent() {
       const ref = this;
       // We need to know when an argument in a trigger has changed, has been added or removed.
-      // If so, we need to change, remove or add topic subscriptions. So register to the 
+      // If so, we need to change, remove or add topic subscriptions. So register to the
       // trigger update event.
       this.eventMQTT.on('update', () => {
          this.logmodule.writelog('info', "Trigger changed" );
@@ -134,7 +134,7 @@ class triggerMQTT {
          this.eventMQTT.getArgumentValues(function( err, values ) {
             ref.logmodule.writelog('info', "topics:" + ref.globalVar.getTopicArray());
 
-            // Check if there are already subscribed topics. If so, then unsubsribe because we 
+            // Check if there are already subscribed topics. If so, then unsubsribe because we
             // need to loop through all triggers and just unsubscribe and re-subscribe again is faster.
             if (ref.globalVar.getTopicArray().length > 0) {
                ref.broker.getConnectedClient().unsubscribe(ref.globalVar.getTopicArray());
@@ -150,11 +150,10 @@ class triggerMQTT {
 
       });
    }
-   
+
    getEventMQTT() {
       return this.eventMQTT;
    }
 }
 
 module.exports = triggerMQTT;
-
