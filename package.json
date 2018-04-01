@@ -1,5 +1,5 @@
 {
-  "name": "og",
+  "name": "nl.scanno.mqtt",
   "version": "2.0.3",
   "description": "MQTT Client PVS",
   "main": "app.js",
