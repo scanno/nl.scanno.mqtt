@@ -8,7 +8,7 @@
       "en": "Subscripe to MQTT topics",
       "nl": "Abonneer op MQTT topics"
    },
-   "version": "2.0.3",
+   "version": "2.0.4",
    "sdk": 2,
    "compatibility": ">=1.5.0",
    "category": [
@@ -153,11 +153,27 @@
               },
               {
                  "name": "retain",
-                 "type": "checkbox",
-                 "title": {
-                    "en": "retain",
-                    "nl": "retain"
-                 }
+                 "type": "dropdown",
+                 "placeholder": {
+                    "en": "Use retain",
+                    "nl": "Gebruik retain"
+                 },
+                 "values": [
+                    {
+                       "id": "0",
+                       "label": {
+                          "en": "False",
+                          "nl": "False"
+                       }
+                    },
+                    {
+                       "id": "1",
+                       "label": {
+                          "en": "True",
+                          "nl": "True"
+                       }
+                    }
+                  ]
               }
             ]
          },

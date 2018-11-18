@@ -145,7 +145,7 @@ class brokerMQTT {
          } else {
             var publish_options = {
                qos: parseInt(args.qos),
-               retain: args.retain
+               retain: (args.retain == '1')
             };
          }
 
