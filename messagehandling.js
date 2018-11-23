@@ -16,24 +16,27 @@ class handlingMQTT {
       this.logmodule = app.logmodule;
       this.triggers  = app.triggers;
    }
-   
+
    receiveMessage(topic, message, args, state) {
       var validJSON = true;
+      const ref=this;
       this.logmodule.writelog('info', "received '" + message.toString() + "' on '" + topic + "'");
 
       let tokens = {
          message: message.toString(),
          topic: topic
       }
-   
+
       let triggerstate = {
-         triggerTopic: topic, 
+         triggerTopic: topic,
       }
-   
-      this.triggers.getEventMQTT().trigger(tokens, triggerstate, null);
+
+      ref.triggers.getEventMQTT().trigger(tokens, triggerstate, null).catch( function(e) {
+        ref.logmodule.writelog('error', "Error occured: " +e);
+      })
       this.logmodule.writelog('info', "Trigger generic card for " + topic);
    }
-   
+
    updateRef(app) {
       this.triggers = app.triggers;
    }
