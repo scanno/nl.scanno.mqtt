@@ -100,8 +100,8 @@
          {
             "id": "publishMQTT_Adv",
             "title": {
-               "en": "Publish message",
-               "nl": "Stuur bericht"
+               "en": "Publish message (advanced)",
+               "nl": "Stuur bericht (uitgebreid)"
             },
             "args":[
                {
@@ -123,7 +123,7 @@
               {
                  "name": "qos",
                  "type": "dropdown",
-                 "placeholder": {
+                 "label": {
                     "en": "Quality of Service",
                     "nl": "Quality of Service"
                  },
@@ -154,7 +154,7 @@
               {
                  "name": "retain",
                  "type": "dropdown",
-                 "placeholder": {
+                 "label": {
                     "en": "Use retain",
                     "nl": "Gebruik retain"
                  },
