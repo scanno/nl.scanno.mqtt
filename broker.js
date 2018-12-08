@@ -1,5 +1,3 @@
-//const Homey     = require('homey');
-
 const mqtt      = require("mqtt/node_modules/mqtt");
 var handleMQTT = require("./messagehandling.js");
 
@@ -16,6 +14,11 @@ class brokerMQTT {
       this.errorOccured = false;
    }
 
+   /**
+    * getBrokerURL - create broker URL based on several settings.
+    *
+    * @return {type}  String with the URL of the broker to connect to.
+    */
    getBrokerURL() {
       var urlBroker = []
 
@@ -35,6 +38,12 @@ class brokerMQTT {
       return urlBroker.join('');
    }
 
+   /**
+    * getConnectOptions - create structure with several options.
+    * Options are depending on several settings from the settings page.
+    *
+    * @return {type}  returns structure with the options to use when connecting.
+    */
    getConnectOptions() {
       if (this.Homey.ManagerSettings.get('otbroker') == true) {
          return null;
@@ -49,18 +58,32 @@ class brokerMQTT {
          }
          this.logmodule.writelog('info', "clientID = "+ clientID);
 
+         var lwt_struct = {};
+         lwt_struct.topic = clientID+"/status";
+         lwt_struct.payload = "Offline";
+         lwt_struct.qos = 0;
+         lwt_struct.retain = true;
+
          var connect_options = {};
          connect_options.keepalive = 10;
          connect_options.username = this.Homey.ManagerSettings.get('user');
          connect_options.password = this.Homey.ManagerSettings.get('password');
          connect_options.rejectUnauthorized = rejectUnauth;
          connect_options.clientId = clientID;
+         connect_options.will = lwt_struct;
 
          this.logmodule.writelog('info', "rejectUnauthorized: " + connect_options.rejectUnauthorized);
          return connect_options
       };
    }
 
+   /**
+    * connectToBroker - description
+    *
+    * @param  {type} args  description
+    * @param  {type} state description
+    * @return {type}       description
+    */
    connectToBroker(args, state) {
       const ref = this;
       if (this.connectedClient == null) {
@@ -119,6 +142,12 @@ class brokerMQTT {
       };
    }
 
+   /**
+    * subscribeToTopic - description
+    *
+    * @param  {type} topicName description
+    * @return {type}           description
+    */
    subscribeToTopic(topicName) {
       if ( this.globalVar.getTopicArray().indexOf(topicName) == -1 ) {
 
@@ -131,6 +160,12 @@ class brokerMQTT {
       }
    }
 
+   /**
+    * sendMessageToTopic - description
+    *
+    * @param  {type} args description
+    * @return {type}      description
+    */
    sendMessageToTopic(args) {
       const ref = this;
       this.logmodule.writelog('debug', "SendMessageToTopic: " +JSON.stringify(args));
@@ -173,14 +208,31 @@ class brokerMQTT {
       }
    }
 
+   /**
+    * getConnectedClient - description
+    *
+    * @return {type}  description
+    */
    getConnectedClient() {
       return this.connectedClient;
    }
 
+
+   /**
+    * clearConnectedClient - description
+    *
+    * @return {type}  description
+    */
    clearConnectedClient() {
       this.connectedClient = null;
    }
 
+   /**
+    * updateRef - description
+    *
+    * @param  {type} app description
+    * @return {type}     description
+    */
    updateRef(app) {
       this.handleMessage.updateRef(app);
    }
