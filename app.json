@@ -29,6 +29,13 @@
          }
       ]
    },
+   "contributing": {
+		"donate": {
+			"paypal": {
+				"username": "scanno"
+			}
+		}
+	},
    "images":{
       "large":"./assets/images/large.jpg",
       "small":"./assets/images/small.jpg"
