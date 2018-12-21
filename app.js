@@ -21,7 +21,7 @@ class MQTTApp extends Homey.App {
       this.broker = new brokerMQTT(this);
       this.triggers = new triggerMQTT(this);
       this.actions = new actionsMQTT(this);
-      
+
       this.broker.updateRef(this);
    }
 
@@ -55,6 +55,21 @@ class MQTTApp extends Homey.App {
    getUserArray() {
       return this.globalVar.getUserArray();
    }
+
+   /**
+    * publishMessage - Publish a message on a given topic.
+    *                  The MQTT broker used is configured in the MQTT client settings.
+    *                  If there is no connection, one is setup to the broker.
+    *
+    * @param  {type} args JSON object containing:
+    *                     mqttTopic: Topic the message should be published on
+    *                     mqttMessage: Message payload that is posted on the topic.
+    *                     qos: 0, 1 or 2 representing the quality of service to be used.
+    *                     retain: true when sending as retained message or false.
+    * @return {type}      returns an error object on failure or true when succesfull
+    */
+   publishMessage(args) {
+      return this.broker.sendMessageToTopic(args);
+   }
 }
 module.exports = MQTTApp;
-

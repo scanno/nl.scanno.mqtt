@@ -205,7 +205,9 @@ class brokerMQTT {
          }
       } catch(err) {
          ref.logmodule.writelog('error', "sendMessageToTopic: " +err);
+         return err;
       }
+      return true;
    }
 
    /**

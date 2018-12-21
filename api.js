@@ -38,8 +38,17 @@ module.exports = [{
       callback(null, result);
    }
 
-}]
-
-
-
-
+},
+{
+   description:	'Publish message (app2app)',
+   method:      'PUT',
+   path:        '/app2app/publish/',
+   requires_authorization: true,
+   role: 'app',
+   fn: function(args, callback) {
+      result = Homey.app.publishMessage(args);
+      if( result instanceof Error ) return callback( result );
+      return callback( null, result );
+   }
+},
+]
