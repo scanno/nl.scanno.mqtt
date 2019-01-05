@@ -187,10 +187,11 @@ class brokerMQTT {
                    // execute callbacks
                    let callbacks = this.loadingTopics.get(topicName);
                    if (callbacks) {
-                     this.loadingTopics.delete(topicName);
-                     for (let callback of callbacks) {
-                       callback(error);
-                     }
+                       this.loadingTopics.delete(topicName);
+                       for (let i = 0; i < callbacks.length; i++) {
+                           let callback = callbacks[i];
+                           callback(error);
+                       }
                    }
                });
            }
@@ -270,7 +271,8 @@ class brokerMQTT {
                         this.connecting = false; // reset
 
                         // send queued messages
-                        for (let a in this.queue) {
+                        for (let i = 0; i < this.queue.length; i++) {
+                            let a = this.queue[i];
                             if (a.retries === undefined) {
                                 a.retries = 3; // max retries
                             }
