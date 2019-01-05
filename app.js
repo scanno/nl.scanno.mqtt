@@ -54,7 +54,17 @@ class MQTTApp extends Homey.App {
    */
    getUserArray() {
       return this.globalVar.getUserArray();
-   }
+    }
+
+    sendMessage(args) {
+        if (args !== undefined) {
+            try {
+                return this.broker.sendMessageToTopic(args.body);
+            } catch (error) {
+                this.logmodule.writelog('error', error);
+            }
+        }
+    }
 }
 module.exports = MQTTApp;
 

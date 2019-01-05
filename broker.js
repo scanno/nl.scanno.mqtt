@@ -73,7 +73,7 @@ class brokerMQTT {
          connect_options.will = lwt_struct;
 
          this.logmodule.writelog('info', "rejectUnauthorized: " + connect_options.rejectUnauthorized);
-         return connect_options
+         return connect_options;
       };
    }
 
@@ -148,16 +148,58 @@ class brokerMQTT {
     * @param  {type} topicName description
     * @return {type}           description
     */
-   subscribeToTopic(topicName) {
-      if ( this.globalVar.getTopicArray().indexOf(topicName) == -1 ) {
+   subscribeToTopic(topicName, callback) {
+       if (this.globalVar.getTopicArray().indexOf(topicName) == -1) {
 
-         // Fill the array with known topics so I can check if I need to subscribe
-         this.globalVar.getTopicArray().push(topicName);
-         if (this.connectedClient == null) {
-            this.connectToBroker();
-         }
-         this.connectedClient.subscribe(topicName);
-      }
+           // Connect if no client available
+           if (this.connectedClient == null) {
+               this.connectToBroker();
+           }
+           
+           this.logmodule.writelog('info', "subscribing to topic " + topicName);
+           let loadingTopic = undefined;
+
+           // Keep a register of callbacks to call when successfully subscribed to the topic
+           if (callback) {
+               this.loadingTopics = this.loadingTopics || new Map();
+               loadingTopic = this.loadingTopics.get(topicName);
+               if (loadingTopic) {
+                   loadingTopic.push(topicName);
+               } else {
+                   this.loadingTopics.set(topicName, [callback]);
+               }
+           }
+
+           // First topic registration?
+           if (!loadingTopic) {
+               // Subscribe to topic
+               this.connectedClient.subscribe(topicName, (error) => {
+                   // success?
+                   if (error) {
+                       this.logmodule.writelog('error', "failed to subscribed to topic " + topicName);
+                       this.logmodule.writelog('error', error);
+                   } else {
+                       // Fill the array with known topics so I can check if I need to subscribe
+                       this.globalVar.getTopicArray().push(topicName);
+                       this.logmodule.writelog('info', "successfully subscribed to topic " + topicName);
+                   }
+
+                   // execute callbacks
+                   let callbacks = this.loadingTopics.get(topicName);
+                   if (callbacks) {
+                     this.loadingTopics.delete(topicName);
+                     for (let callback of callbacks) {
+                       callback(error);
+                     }
+                   }
+               });
+           }
+       } else { // already registered
+           this.logmodule.writelog('info', "already subscribed to topic " + topicName);
+           if (callback) {
+               callback();
+           }
+       }
    }
 
    /**
@@ -166,47 +208,103 @@ class brokerMQTT {
     * @param  {type} args description
     * @return {type}      description
     */
-   sendMessageToTopic(args) {
-      const ref = this;
-      this.logmodule.writelog('debug', "SendMessageToTopic: " +JSON.stringify(args));
-      this.logmodule.writelog('debug',"qos: "+ parseInt(args.qos));
+    sendMessageToTopic(args) {
+        this.logmodule.writelog('info', "SendMessageToTopic called");
+        this.logmodule.writelog('debug', "SendMessageToTopic: " + JSON.stringify(args));
+        this.logmodule.writelog('debug', "qos: " + parseInt(args.qos));
 
-      try {
-         if (args.qos == undefined || args.retain == undefined) {
-            var publish_options = {
-               qos: 0,
-               retain: false
-            };
-         } else {
-            var publish_options = {
-               qos: parseInt(args.qos),
-               retain: (args.retain == '1')
-            };
-         }
+        // Check max number of retries to prevend endless loops
+        if (args.retries > 0) {
+            if (args.retries--) {
+                this.logmodule.writelog('info', "Retry sending message");
+            } else {
+                this.logmodule.writelog('info', "Skip sending message: max retries reached");
+                return;
+            }
+        }
 
-         this.logmodule.writelog('debug', "publish_options: " +JSON.stringify(publish_options));
-         // Check if there is already a connection  to the broker
-         this.logmodule.writelog('info', "SendMessageToTopic called");
-         if (this.connectedClient == null) {
-            // There is no connection, so create a connection and send the message
-            var client = mqtt.connect(this.getBrokerURL(), this.getConnectOptions());
-            client.on('connect', function () {
-               ref.logmodule.writelog('info', "Broker not connected, attemting connection");
-               client.publish(args.mqttTopic, args.mqttMessage, publish_options,function() {
-                  ref.logmodule.writelog('info', "send " + args.mqttMessage + " on topic " + args.mqttTopic);
-                  client.end();
-               });
-            });
-         } else {
-            // There is already a connection, so the message can be send
-            ref.connectedClient.publish(args.mqttTopic, args.mqttMessage, publish_options, function() {
-               ref.logmodule.writelog('info', "send " + args.mqttMessage + " on topic " + args.mqttTopic);
-            });
-         }
-      } catch(err) {
-         ref.logmodule.writelog('error', "sendMessageToTopic: " +err);
-      }
-   }
+        // validate
+        if (!args) {
+            this.logmodule.writelog('error', "SendMessageToTopic: no arguments provided");
+            return;
+        }
+        if (!args.mqttTopic) {
+            this.logmodule.writelog('error', "SendMessageToTopic: no mqttTopic provided in arguments");
+            this.logmodule.writelog('debug', "arguments: ");
+            this.logmodule.writelog('debug', JSON.stringify(args, null, 2));
+            return;
+        }
+
+        // send
+        try {
+            let publish_options;
+            if (args.qos == undefined || args.retain == undefined) {
+                publish_options = {
+                    qos: 0,
+                    retain: false
+                };
+            } else {
+                publish_options = {
+                    qos: parseInt(args.qos),
+                    retain: (args.retain == '1')
+                };
+            }
+
+            this.logmodule.writelog('debug', "publish_options: " + JSON.stringify(publish_options));
+
+            // Check if there is already a connection  to the broker
+            if (!this.connectedClient || this.connecting) {
+
+                // add message to unsend queue
+                this.queue = this.queue || [];
+                this.queue.push(args);
+
+                this.logmodule.writelog('debug', "connecting: added message to queue");
+
+                // There is no connection, so create a connection and send the message
+                if (!this.connecting) {
+                    this.connecting = true; // set flag to prevent concurrent connection attempts
+                    this.logmodule.writelog('info', "Broker not connected, attempting connection");
+                    this.connectToBroker(args);
+                    this.connectedClient.on('connect', () => {
+                        this.connecting = false; // reset
+
+                        // send queued messages
+                        for (let a in this.queue) {
+                            if (a.retries === undefined) {
+                                a.retries = 3; // max retries
+                            }
+                            this.sendMessageToTopic(a); // NOTE: recursive
+                        }
+                        // reset queue
+                        this.queue = undefined;
+                    });
+                } else {
+                    this.logmodule.writelog('info', "Broker not available, waiting for connection");
+                }
+            } else {
+
+                // There is already a connection, so the message can be send, subscribe to the topic if needed
+                this.subscribeToTopic(args.mqttTopic, (error) => {
+                    if (!error) {
+
+                        // parse objects to string
+                        if (args.mqttMessage && typeof args.mqttMessage !== 'string') {
+                            args.mqttMessage = JSON.stringify(args.mqttMessage);
+                        }
+
+                        // publish messsage to topic
+                        this.connectedClient.publish(args.mqttTopic, args.mqttMessage, publish_options, () =>
+                            this.logmodule.writelog('debug', "send " + args.mqttMessage + " on topic " + args.mqttTopic)
+                        );
+                    }
+                });
+
+            }
+        } catch (err) {
+            this.logmodule.writelog('error', "sendMessageToTopic: " + err);
+        }
+    }
 
    /**
     * getConnectedClient - description
