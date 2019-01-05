@@ -57,7 +57,7 @@ class MQTTApp extends Homey.App {
    }
 
    /**
-    * publishMessage - Publish a message on a given topic.
+    * sendMessage - Publish a message on a given topic.
     *                  The MQTT broker used is configured in the MQTT client settings.
     *                  If there is no connection, one is setup to the broker.
     *
@@ -68,8 +68,14 @@ class MQTTApp extends Homey.App {
     *                     retain: true when sending as retained message or false.
     * @return {type}      returns an error object on failure or true when succesfull
     */
-   publishMessage(args) {
-      return this.broker.sendMessageToTopic(args);
-   }
+    sendMessage(args) {
+        if (args !== undefined) {
+            try {
+                return this.broker.sendMessageToTopic(args.body);
+            } catch (error) {
+                this.logmodule.writelog('error', error);
+            }
+        }
+    }
 }
 module.exports = MQTTApp;

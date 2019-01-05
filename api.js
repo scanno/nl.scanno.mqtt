@@ -37,18 +37,16 @@ module.exports = [{
       var result = Homey.app.getLogLines(args);
       callback(null, result);
    }
-
 },
 {
-   description:	'Publish message (app2app)',
-   method:      'PUT',
-   path:        '/app2app/publish/',
+   description:	'Send message to broker',
+   method:      'POST',
+   path:        '/send/',
    requires_authorization: true,
-   role: 'app',
-   fn: function(args, callback) {
-      result = Homey.app.publishMessage(args);
-      if( result instanceof Error ) return callback( result );
-      return callback( null, result );
+   fn: function (args, callback) {
+      console.log("API: Incoming POST on /send/");
+      var result = Homey.app.sendMessage(args);
+      if (result instanceof Error) callback(result);
+      callback(null, result);
    }
-},
-]
+}]
