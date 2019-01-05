@@ -189,15 +189,17 @@ class brokerMQTT {
                    if (callbacks) {
                        this.loadingTopics.delete(topicName);
                        for (let i = 0; i < callbacks.length; i++) {
-                           let callback = callbacks[i];
-                           callback(error);
+                           let cb = callbacks[i];
+                           if (cb && typeof cb === 'function') {
+                                cb(error);
+                           }
                        }
                    }
                });
            }
        } else { // already registered
            this.logmodule.writelog('info', "already subscribed to topic " + topicName);
-           if (callback) {
+           if (callback && typeof callback === 'function') {
                callback();
            }
        }
