@@ -2,14 +2,12 @@
 const Homey = require('homey');
 
 const globalVarMQTT = require("./global.js");
-//const logmodule = require("./logmodule.js");
 const brokerMQTT    = require("./broker.js");
 const actionsMQTT   = require("./actions.js");
 const triggerMQTT  = require("./triggers.js");
 
-//var globalVar = null;
-
 class MQTTApp extends Homey.App {
+
    /*
       Initialize the Owntracks app. Register all variables,
       Connect to the broker when the broker is used.
@@ -23,8 +21,8 @@ class MQTTApp extends Homey.App {
       this.actions = new actionsMQTT(this);
 
       this.broker.updateRef(this);
-   }
-
+    }
+    
    changedSettings(args) {
       this.logmodule.writelog("changedSettings called");
       this.logmodule.writelog(args.body);
@@ -76,6 +74,11 @@ class MQTTApp extends Homey.App {
                 this.logmodule.writelog('error', error);
             }
         }
+    }
+
+    subscribeToTopic(topic, callback) {
+        this.logmodule.writelog('info', 'subscribe to topic: ' + topic);
+        this.broker.subscribeToTopic(topic, callback);
     }
 }
 module.exports = MQTTApp;
