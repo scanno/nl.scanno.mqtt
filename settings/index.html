@@ -9,73 +9,67 @@
         <h1 data-i18n="settings.app.title"></h1>
         <form id="owntracks">
 
-        <fieldset id="server">
+        <fieldset id="serversettings">
             <legend>
-                <label data-i18n="settings.app.server.server_title"></label>
+                <label data-i18n="settings.app.server.server_details"></label>
             </legend>
-            <div class="field">
-                <input class="checkbox" id="otbroker" type="checkbox" checked="true"
-                    onchange="owntracks.serversettings.disabled = checked">
-                <label class="form_label" for="otbroker" data-i18n="settings.app.server.public_broker"</label>
+
+            <p data-i18n="settings.app.server.server_explanation"></p>
+
+            <div class="field row">
+                <label class="form_label" for="Url" data-i18n="settings.app.server.url"></label>
+                <br>
+                <input class="form_input" id="url" type="text" value="" /> <br>
             </div>
 
-            <fieldset id="serversettings">
-                <legend>
-                    <label data-i18n="settings.app.server.server_details"></label>
-                </legend>
+            <div class="field row">
+                <label class="form_label" for="ip_port" data-i18n="settings.app.server.port"></label>
+                <br>
+                <input class="form_input" id="ip_port" type="text" value="1883" /> <br>
+            </div>
 
-                <p data-i18n="settings.app.server.server_explanation"></p>
+            <div class="field">
+                <input class="checkbox" id="tls" type="checkbox"/>
+                <label class="form_label" for="tls" data-i18n="settings.app.server.tls"></label>
+            </div>
 
-                <div class="field row">
-                    <label class="form_label" for="Url" data-i18n="settings.app.server.url"></label>
-                    <br>
-                    <input class="form_input" id="url" type="text" value="" /> <br>
-                </div>
+            <div class="field">
+                <input class="checkbox" id="selfsigned" type="checkbox"/>
+                <label class="form_label" for="selfsigned" data-i18n="settings.app.server.selfsigned"></label>
+            </div>
 
-                <div class="field row">
-                    <label class="form_label" for="ip_port" data-i18n="settings.app.server.port"></label>
-                    <br>
-                    <input class="form_input" id="ip_port" type="text" value="1883" /> <br>
-                </div>
+            <div class="field row">
+                <label class="form_label" for="keepalive" data-i18n="settings.app.server.keepalive"></label>
+                <br>
+                <input class="form_input" id="keepalive" type="text" value="60" /> <br>
+             </div>
 
-                <div class="field">
-                    <input class="checkbox" id="tls" type="checkbox"/>
-                    <label class="form_label" for="tls" data-i18n="settings.app.server.tls"></label>
-                </div>
+            <div class="field row">
+                <label class="form_label" for="User" data-i18n="settings.app.server.username"></label>
+                <br>
+                <input class="form_input" id="user" type="text" value="" /> <br>
+             </div>
 
-                <div class="field">
-                    <input class="checkbox" id="selfsigned" type="checkbox"/>
-                    <label class="form_label" for="selfsigned" data-i18n="settings.app.server.selfsigned"></label>
-                </div>
+             <div class="field row">
+                 <label class="form_label" for="Password" data-i18n="settings.app.server.password"></label>
+                 <br>
+                 <input class="form_input" id="password" type="password" value="" /> <br>
+            </div>
 
-                <div class="field row">
-                    <label class="form_label" for="User" data-i18n="settings.app.server.username"></label>
-                    <br>
-                    <input class="form_input" id="user" type="text" value="" /> <br>
-                 </div>
+            <div class="field">
+               <input class="checkbox" id="custom_clientid" type="checkbox" checked="false"
+                  onchange="owntracks.clientid.disabled = !checked">
+               <label class="form_label" for="custom_clientid" data-i18n="settings.app.server.custom_clientid"</label>
+           </div>
 
-                 <div class="field row">
-                     <label class="form_label" for="Password" data-i18n="settings.app.server.password"></label>
-                     <br>
-                     <input class="form_input" id="password" type="password" value="" /> <br>
-                </div>
-
-                <div class="field">
-                   <input class="checkbox" id="custom_clientid" type="checkbox" checked="false"
-                      onchange="owntracks.clientid.disabled = !checked">
-                   <label class="form_label" for="custom_clientid" data-i18n="settings.app.server.custom_clientid"</label>
-               </div>
-
-               <div class="field row">
-                   <label class="form_label" for="clientid" data-i18n="settings.app.server.clientid"></label>
-                   <br>
-                   <input class="form_input" id="clientid" type="text" value="" /> <br>
-               </div>
+           <div class="field row">
+               <label class="form_label" for="clientid" data-i18n="settings.app.server.clientid"></label>
+               <br>
+               <input class="form_input" id="clientid" type="text" value="" /> <br>
+           </div>
 
 
-            </fieldset>
         </fieldset>
-
         </form>
 
         <p data-i18n="settings.app.log.title"></p>
@@ -92,18 +86,6 @@
 
         function onHomeyReady(Homey){
            HomeyAPI = Homey;
-
-           Homey.get('otbroker', function(err, otbroker) {
-                  if (err) {
-                    console.error(err)
-                  } else {
-                    document.getElementById('otbroker').value = otbroker;
-                  }
-                  if (typeof otbroker == 'undefined' || otbroker == null) otbroker = false;
-                  document.getElementById('otbroker').checked = otbroker;
-                  document.getElementById('serversettings').disabled = otbroker;
-                  currentValues.otbroker = otbroker;
-           })
 
            Homey.get('url', function(err, url) {
                   if (err) {
@@ -140,6 +122,15 @@
                   if (typeof selfsigned == 'undefined' || selfsigned == null) selfsigned = false;
                   document.getElementById('selfsigned').checked = selfsigned;
                   currentValues.selfsigned = selfsigned;
+           })
+
+           Homey.get('keepalive', function(err, keepalive) {
+                  if (err) {
+                    console.error(err)
+                  } else {
+                    document.getElementById('keepalive').value = keepalive;
+                    currentValues.keepalive = keepalive;
+                  }
            })
 
            Homey.get('user', function(err, user) {
@@ -186,13 +177,6 @@
             console.log(oldValues);
             var valuesHaveBeenChanged = false;
 
-            if (currentValues.otbroker != document.getElementById('otbroker').checked) {
-                console.log("otbroker has been changed");
-                HomeyAPI.set('otbroker', document.getElementById('otbroker').checked);
-                valuesHaveBeenChanged = true;
-                currentValues.otbroker = document.getElementById('otbroker').checked;
-            }
-
             if (currentValues.url != document.getElementById('url').value) {
                 console.log("url has been changed");
                 HomeyAPI.set('url', document.getElementById('url').value);
@@ -221,6 +205,13 @@
                 currentValues.selfsigned = document.getElementById('selfsigned').checked;
             }
 
+            if (currentValues.keepalive != document.getElementById('keepalive').value) {
+                console.log("keepalive has been changed");
+                HomeyAPI.set('keepalive', document.getElementById('keepalive').value);
+                valuesHaveBeenChanged = true;
+                currentValues.keepalive = document.getElementById('keepalive').value;
+            }
+
             if (currentValues.user != document.getElementById('user').value) {
                 console.log("user has been changed");
                 HomeyAPI.set('user', document.getElementById('user').value);
@@ -234,7 +225,7 @@
                 valuesHaveBeenChanged = true;
                 currentValues.password = document.getElementById('password').value;
             }
-            
+
             if (currentValues.custom_clientid != document.getElementById('custom_clientid').checked) {
                 console.log("custom_clientid has been changed");
                 HomeyAPI.set('custom_clientid', document.getElementById('custom_clientid').checked);
@@ -265,7 +256,7 @@
                     // Oeps, something went wrong here
                     Homey.alert(__('settings.app.messages.unable_set_settings'));
                 }
-                
+
             });
         }
 
@@ -284,4 +275,3 @@
 
     </body>
 </html>
-
