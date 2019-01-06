@@ -186,13 +186,15 @@ class brokerMQTT {
                    }
 
                    // execute callbacks
-                   let callbacks = this.loadingTopics.get(topicName);
-                   if (callbacks) {
-                       this.loadingTopics.delete(topicName);
-                       for (let i = 0; i < callbacks.length; i++) {
-                           let cb = callbacks[i];
-                           if (cb && typeof cb === 'function') {
-                                cb(error);
+                   if (this.loadingTopics) {
+                       let callbacks = this.loadingTopics.get(topicName);
+                       if (callbacks) {
+                           this.loadingTopics.delete(topicName);
+                           for (let i = 0; i < callbacks.length; i++) {
+                               let cb = callbacks[i];
+                               if (cb && typeof cb === 'function') {
+                                    cb(error);
+                               }
                            }
                        }
                    }
