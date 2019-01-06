@@ -49,4 +49,15 @@ module.exports = [{
       if (result instanceof Error) callback(result);
       callback(null, result);
    }
-}]
+},
+{
+   description: 'Subscribe to topic, messages will be send via the realtime api',
+   method: 'POST',
+   path: '/subscribe/',
+   requires_authorization: true,
+   fn: function (args, callback) {
+       console.log("API: Incoming POST on /subscribe/");
+       Homey.app.subscribeToTopic(args.body.topic, callback);
+    }
+}];
+

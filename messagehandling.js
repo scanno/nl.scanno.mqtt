@@ -1,5 +1,7 @@
 "use strict";
 
+const { ManagerApi } = require('homey');
+
 class handlingMQTT {
 
    constructor(app) {
@@ -37,7 +39,15 @@ class handlingMQTT {
         ref.logmodule.writelog('error', "Error occured: " +e);
       })
       this.logmodule.writelog('info', "Trigger generic card for " + topic);
+
+      this.dispatchToRealtimeApi(topic, message);
    }
+
+    dispatchToRealtimeApi(topic, message) {
+        this.logmodule.writelog('debug', "send message to listeners via realtime api");
+        this.logmodule.writelog('debug', topic + ": " + message.toString());
+        ManagerApi.realtime(topic, JSON.parse(message.toString()));
+    }
 
    /**
     * updateRef - updates references to other classes
