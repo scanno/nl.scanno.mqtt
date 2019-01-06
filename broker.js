@@ -213,7 +213,7 @@ class brokerMQTT {
     * @param  {type} args description
     * @return {type}      description
     */
-    sendMessageToTopic(args) {
+    sendMessageToTopic(args, subscribe) {
         this.logmodule.writelog('info', "SendMessageToTopic called");
         this.logmodule.writelog('debug', "SendMessageToTopic: " + JSON.stringify(args));
         this.logmodule.writelog('debug', "qos: " + parseInt(args.qos));
@@ -289,23 +289,15 @@ class brokerMQTT {
                     this.logmodule.writelog('info', "Broker not available, waiting for connection");
                 }
             } else {
+                // parse objects to string
+                if (args.mqttMessage && typeof args.mqttMessage !== 'string') {
+                    args.mqttMessage = JSON.stringify(args.mqttMessage);
+                }
 
-                // There is already a connection, so the message can be send, subscribe to the topic if needed
-                this.subscribeToTopic(args.mqttTopic, (error) => {
-                    if (!error) {
-
-                        // parse objects to string
-                        if (args.mqttMessage && typeof args.mqttMessage !== 'string') {
-                            args.mqttMessage = JSON.stringify(args.mqttMessage);
-                        }
-
-                        // publish messsage to topic
-                        this.connectedClient.publish(args.mqttTopic, args.mqttMessage, publish_options, () =>
-                            this.logmodule.writelog('debug', "send " + args.mqttMessage + " on topic " + args.mqttTopic)
-                        );
-                    }
-                });
-
+                // publish messsage to topic
+                this.connectedClient.publish(args.mqttTopic, args.mqttMessage, publish_options, () =>
+                    this.logmodule.writelog('debug', "send " + args.mqttMessage + " on topic " + args.mqttTopic)
+                );
             }
         } catch (err) {
             this.logmodule.writelog('error', "sendMessageToTopic: " + err);
