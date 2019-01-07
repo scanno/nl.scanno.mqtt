@@ -193,7 +193,7 @@ class brokerMQTT {
                            for (let i = 0; i < callbacks.length; i++) {
                                let cb = callbacks[i];
                                if (cb && typeof cb === 'function') {
-                                    cb(error);
+                                   cb(error, {});
                                }
                            }
                        }
@@ -203,7 +203,7 @@ class brokerMQTT {
        } else { // already registered
            this.logmodule.writelog('info', "already subscribed to topic " + topicName);
            if (callback && typeof callback === 'function') {
-               callback();
+               callback(null, {});
            }
        }
    }
