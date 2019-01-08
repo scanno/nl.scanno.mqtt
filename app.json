@@ -23,10 +23,14 @@
    },
    "contributors": {
       "developers": [
-         {
-            "name": "Menno van Grinsven",
-            "email": "mgrinsven@gmail.com"
-         }
+        {
+          "name": "Menno van Grinsven",
+          "email": "mgrinsven@gmail.com"
+        },
+        {
+            "name": "Harrie de Groot",
+            "email": "harriedegroot@gmail.com"
+        }
       ]
    },
    "contributing": {
