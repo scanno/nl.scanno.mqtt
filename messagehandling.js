@@ -44,9 +44,15 @@ class handlingMQTT {
    }
 
     dispatchToRealtimeApi(topic, message) {
+        var messageToSend;
         this.logmodule.writelog('debug', "send message to listeners via realtime api");
         this.logmodule.writelog('debug', topic + ": " + message.toString());
-        ManagerApi.realtime(topic, JSON.parse(message.toString()));
+        try {
+            messageToSend = JSON.parse(message.toString());
+        } catch (err) {
+            messageToSend = message.toString();
+        }
+        ManagerApi.realtime(topic, messageToSend);
     }
 
    /**
