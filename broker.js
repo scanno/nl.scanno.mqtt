@@ -222,7 +222,7 @@ class brokerMQTT {
    }
 
    subscribeToApiTopic(topic, callback) {
-     subscribeToTopic(topicName, callback, true);
+        this.subscribeToTopic(topic, callback, true);
    }
 
    /**
