@@ -1,13 +1,9 @@
 "use strict";
-//const globalVarMQTT = require("./global.js");
 
 class triggerMQTT {
 
    constructor (app) {
       this.broker    = app.broker
- //     this.globalVar = new globalVarMQTT;
-      this.globalVar = app.globalVar;
-//      this.logmodule = require("./logmodule.js");
       this.logmodule = app.logmodule;
       this.Homey     = require('homey');
       this.eventMQTT = null;
@@ -44,12 +40,13 @@ class triggerMQTT {
    async getTriggerArgs() {
       const ref = this;
       try {
-         if (this.globalVar.getTopicArray().length > 0) {
-            this.globalVar.clearTopicArray();
-         };
-         this.logmodule.writelog('info', "Registered topics:" + this.globalVar.getTopicArray());
+         if (this.broker.getTopicArray().getTriggerTopicArray().length > 0) {
+           this.logmodule.writelog('info', "Cleaning topic array");
+           this.broker.getTopicArray().clearTopicArray();
+         }
+         this.logmodule.writelog('info', "Registered topics:" + this.broker.getTopicArray().getTriggerTopics());
          await this.getEventMQTTArgs().then((result) => {
-            this.logmodule.writelog('info', "Registered topics:" + this.globalVar.getTopicArray());
+            this.logmodule.writelog('info', "Registered topics:" + this.broker.getTopicArray().getTriggerTopics());
             return true;
          });
       } catch(err) {
@@ -66,7 +63,6 @@ class triggerMQTT {
           ref.logmodule.writelog('info', "Trigger Arguments for eventMQTT: " + element.mqttTopic);
           ref.broker.subscribeToTopic(element.mqttTopic);
         });
-        ref.logmodule.writelog('info', "boe");
         return true;
       } catch(err) {
         this.logmodule.writelog('error', "getEventMQTTArgs: " +err);
@@ -106,7 +102,7 @@ class triggerMQTT {
                matchTopic = false;
             }
          }
-      };
+      }
 
       // If the topic that triggered me the topic I was waiting for?
       if (matchTopic == true) {
@@ -114,10 +110,7 @@ class triggerMQTT {
          return true;
       }
       // This is not the topic I was waiting for and it is a known topic
-      else if (state.triggerTopic !== args.mqttTopic & this.globalVar.getTopicArray().indexOf(args.mqttTopic) !== -1) {
-         this.logmodule.writelog('info', "We are not waiting for this topic");
-         return false;
-      };
+      this.logmodule.writelog('info', "We are not waiting for this topic");
       return false;
    }
 
@@ -131,22 +124,22 @@ class triggerMQTT {
 
          // get the new arguments
          this.eventMQTT.getArgumentValues(function( err, values ) {
-            ref.logmodule.writelog('info', "topics:" + ref.globalVar.getTopicArray());
+            ref.logmodule.writelog('info', "topics:" + ref.broker.getTopicArray().getTriggerTopics());
 
             // Check if there are already subscribed topics. If so, then unsubsribe because we
             // need to loop through all triggers and just unsubscribe and re-subscribe again is faster.
-            if (ref.globalVar.getTopicArray().length > 0) {
-               ref.broker.getConnectedClient().unsubscribe(ref.globalVar.getTopicArray());
-               ref.globalVar.clearTopicArray();
+            if (ref.broker.getTopicArray().getTriggerTopicArray().length > 0) {
+               ref.broker.getConnectedClient().unsubscribe(ref.broker.getTopicArray().getTriggerTopics());
+               ref.logmodule.writelog('info', "Unsubscribing topics:" + ref.broker.getTopicArray().getTriggerTopics());
+               ref.broker.getTopicArray().clearTopicArray();
             };
             // `args` is an array of trigger objects, one entry per flow
             values.forEach(function(element) {
                ref.logmodule.writelog('info', "Trigger Arguments: " + element.mqttTopic);
                ref.broker.subscribeToTopic(element.mqttTopic);
             });
-            ref.logmodule.writelog('info', "topics:" + ref.globalVar.getTopicArray());
+            ref.logmodule.writelog('info', "topics:" + ref.broker.getTopicArray().getTriggerTopics());
          });
-
       });
    }
 

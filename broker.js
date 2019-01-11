@@ -1,14 +1,16 @@
 const mqtt      = require("mqtt/node_modules/mqtt");
+var TopicArray = require("./Topics.js")
 var handleMQTT = require("./messagehandling.js");
 
 class brokerMQTT {
 
    constructor(app) {
       this.logmodule = app.logmodule;
-      this.globalVar = app.globalVar;
       this.handleMessage = new handleMQTT(app);
       this.Homey = require('homey');
       this.connectedClient = null;
+
+      this.topicArray = new TopicArray();
 
       this.brokerState = "DISCONNECTED";
       this.errorOccured = false;
@@ -131,7 +133,7 @@ class brokerMQTT {
             ref.brokerState = "CONNECTED";
             ref.errorOccured = false;
             ref.logmodule.writelog('info', "MQTT client connected");
-            ref.logmodule.writelog('info', "Connected Topics: " + ref.globalVar.getTopicArray());
+            ref.logmodule.writelog('info', "Connected Topics: " + ref.getTopicArray().getTriggerTopics());
             ref.logmodule.writelog('info', "Broker State: " + ref.brokerState);
          });
 
@@ -149,19 +151,24 @@ class brokerMQTT {
     * @param  {type} topicName description
     * @return {type}           description
     */
-   subscribeToTopic(topicName, callback) {
-       if (this.globalVar.getTopicArray().indexOf(topicName) == -1) {
-
-           // Connect if no client available
-           if (this.connectedClient == null) {
+   subscribeToTopic(topicName, callback, api) {
+      if (!this.topicArray.exists(topicName)) {  // || !this.topicArray.getTopic(topicName).isRegistered()) {
+         // Connect if no client available
+         if (this.connectedClient == null) {
                this.connectToBroker();
-           }
+         }
 
-           this.logmodule.writelog('info', "subscribing to topic " + topicName);
-           let loadingTopic = undefined;
+         if (api) {
+           this.logmodule.writelog('info', "subscribing to api topic " + topicName);
+           this.topicArray.addApiTopic(topicName);
+         } else {
+           this.logmodule.writelog('info', "subscribing to trigger topic " + topicName);
+           this.topicArray.addTriggerTopic(topicName);
+         }
+//         let loadingTopic = undefined;
 
-           // Keep a register of callbacks to call when successfully subscribed to the topic
-           if (callback) {
+         // Keep a register of callbacks to call when successfully subscribed to the topic
+/*         if (callback) {
                this.loadingTopics = this.loadingTopics || new Map();
                loadingTopic = this.loadingTopics.get(topicName);
                if (loadingTopic) {
@@ -170,36 +177,42 @@ class brokerMQTT {
                    this.loadingTopics.set(topicName, [callback]);
                }
            }
-
+*/
            // First topic registration?
-           if (!loadingTopic) {
-               // Subscribe to topic
-               this.connectedClient.subscribe(topicName, (error) => {
-                   // success?
-                   if (error) {
-                       this.logmodule.writelog('error', "failed to subscribed to topic " + topicName);
-                       this.logmodule.writelog('error', error);
-                   } else {
-                       // Fill the array with known topics so I can check if I need to subscribe
-                       this.globalVar.getTopicArray().push(topicName);
-                       this.logmodule.writelog('info', "successfully subscribed to topic " + topicName);
+//         if (!loadingTopic) {
+         if (!this.topicArray.getTopic(topicName).isRegistered()) {
+            // Subscribe to topic
+            this.connectedClient.subscribe(topicName, (error) => {
+              // success?
+              if (error) {
+                 this.logmodule.writelog('error', "failed to subscribed to topic " + topicName);
+                 this.logmodule.writelog('error', error);
+                 if (this.topicArray.getTopic(topicName) !== null) {
+                   if (!this.topicArray.getTopic(topicName).getRegistered()) {
+                      this.topicArray.remove(topicName);
                    }
+                 }
+              } else {
+                // Fill the array with known topics so I can check if I need to subscribe
+                this.topicArray.getTopic(topicName).setRegistered(true);
+                this.logmodule.writelog('info', "successfully subscribed to topic " + topicName);
+              }
 
-                   // execute callbacks
-                   if (this.loadingTopics) {
-                       let callbacks = this.loadingTopics.get(topicName);
-                       if (callbacks) {
-                           this.loadingTopics.delete(topicName);
-                           for (let i = 0; i < callbacks.length; i++) {
-                               let cb = callbacks[i];
-                               if (cb && typeof cb === 'function') {
-                                   cb(error, {});
-                               }
-                           }
-                       }
-                   }
-               });
-           }
+              // execute callbacks
+//              if (this.loadingTopics) {
+//                let callbacks = this.loadingTopics.get(topicName);
+//                if (callbacks) {
+//                  this.loadingTopics.delete(topicName);
+//                    for (let i = 0; i < callbacks.length; i++) {
+//                      let cb = callbacks[i];
+//                      if (cb && typeof cb === 'function') {
+//                        cb(error, {});
+//                      }
+//                   }
+//                 }
+//              }
+           });
+         }
        } else { // already registered
            this.logmodule.writelog('info', "already subscribed to topic " + topicName);
            if (callback && typeof callback === 'function') {
@@ -208,13 +221,17 @@ class brokerMQTT {
        }
    }
 
+   subscribeToApiTopic(topic, callback) {
+     subscribeToTopic(topicName, callback, true);
+   }
+
    /**
     * sendMessageToTopic - description
     *
     * @param  {type} args description
     * @return {type}      description
     */
-    sendMessageToTopic(args, subscribe) {
+    sendMessageToTopic(args) {
         this.logmodule.writelog('info', "SendMessageToTopic called");
         this.logmodule.writelog('debug', "SendMessageToTopic: " + JSON.stringify(args));
         this.logmodule.writelog('debug', "qos: " + parseInt(args.qos));
@@ -332,6 +349,10 @@ class brokerMQTT {
     */
    updateRef(app) {
       this.handleMessage.updateRef(app);
+   }
+
+   getTopicArray() {
+     return this.topicArray;
    }
 }
 

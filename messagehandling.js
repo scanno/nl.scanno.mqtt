@@ -5,7 +5,6 @@ const { ManagerApi } = require('homey');
 class handlingMQTT {
 
    constructor(app) {
-      this.globalVar = app.globalVar;
       this.logmodule = app.logmodule;
       this.triggers  = app.triggers;
    }

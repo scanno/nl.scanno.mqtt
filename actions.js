@@ -1,41 +1,25 @@
 "use strict";
-//const Homey = require('homey');
-
-//var globalVar = require("./global.js");
-//var logmodule = require("./logmodule.js");
-//var broker    = require("./broker.js");
-
-//var publishMQTT = null;
-//var sayString = null;
-
-/*module.exports = {
-   registerActions: function() {
-      registerActions();
-   }
-}
-*/
 
 class actionsMQTT {
    constructor (app) {
       this.logmodule = app.logmodule;
-      this.globalVar = app.globalVar;
       this.broker = app.broker;
       this.publishMQTT = null;
       this.sayString = null;
       this.Homey = require('homey');
       this.OnInit();
    }
-   
+
    OnInit() {
       this.registerActions();
    }
-   
+
    registerActions() {
       const ref = this;
       this.logmodule.writelog("registerActions called");
 
       // Put all the action trigger here for registering them and executing the action
-   
+
       this.publishMQTT = new this.Homey.FlowCardAction('publishMQTT');
       this.publishMQTT_Adv = new this.Homey.FlowCardAction('publishMQTT_Adv');
       this.sayString = new this.Homey.FlowCardAction('sayString');
