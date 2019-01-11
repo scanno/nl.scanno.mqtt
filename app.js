@@ -1,7 +1,6 @@
 "use strict";
 const Homey = require('homey');
 
-const globalVarMQTT = require("./global.js");
 const brokerMQTT    = require("./broker.js");
 const actionsMQTT   = require("./actions.js");
 const triggerMQTT  = require("./triggers.js");
@@ -15,29 +14,28 @@ class MQTTApp extends Homey.App {
    */
    onInit() {
       this.logmodule = require("./logmodule.js");
-      this.globalVar = new globalVarMQTT(this);
       this.broker = new brokerMQTT(this);
       this.triggers = new triggerMQTT(this);
       this.actions = new actionsMQTT(this);
 
       this.broker.updateRef(this);
     }
-    
+
    changedSettings(args) {
       this.logmodule.writelog("changedSettings called");
       this.logmodule.writelog(args.body);
-      this.logmodule.writelog("topics:" + this.globalVar.getTopicArray())
+      this.logmodule.writelog("topics:" + this.broker.getTopicArray().getTopics())
 
-      if (this.globalVar.getTopicArray().length > 0) {
-         this.broker.getConnectedClient().unsubscribe(this.globalVar.getTopicArray());
-         this.globalVar.clearTopicArray();
+      if (this.broker.getTopicArray().getTopics().length > 0) {
+         this.broker.getConnectedClient().unsubscribe(this.broker.getTopicArray().getTopics());
+         this.broker.getTopicArray().clearTopicArray();
       };
 
       if (this.broker.getConnectedClient() !== null) {
          this.broker.getConnectedClient().end(true);
       }
 
-      this.logmodule.writelog("topics:" + this.globalVar.getTopicArray());
+      this.logmodule.writelog("topics:" + this.broker.getTopicArray().getTopics());
       this.broker.clearConnectedClient();
       this.triggers.getTriggerArgs();
       return true;
@@ -45,13 +43,6 @@ class MQTTApp extends Homey.App {
 
    getLogLines() {
       return this.logmodule.getLogLines();
-   }
-
-   /*
-      getUserArray: Getter for returning the user array to settings.
-   */
-   getUserArray() {
-      return this.globalVar.getUserArray();
    }
 
    /**
@@ -77,8 +68,8 @@ class MQTTApp extends Homey.App {
     }
 
     subscribeToTopic(topic, callback) {
-        this.logmodule.writelog('info', 'subscribe to topic: ' + topic);
-        this.broker.subscribeToTopic(topic, callback);
+        this.logmodule.writelog('info', 'API: subscribe to topic: ' + topic);
+        this.broker.subscribeToApiTopic(topic, callback);
     }
 }
 module.exports = MQTTApp;
