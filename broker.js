@@ -260,18 +260,11 @@ class brokerMQTT {
 
         // send
         try {
-            let publish_options;
-            if (args.qos == undefined || args.retain == undefined) {
-                publish_options = {
-                    qos: 0,
-                    retain: false
-                };
-            } else {
-                publish_options = {
-                    qos: parseInt(args.qos),
-                    retain: (args.retain == '1')
-                };
-            }
+            let qos = typeof args.qos === 'string' ? parseInt(args.qos) : args.qos;
+            let publish_options = {
+                qos: qos && qos >= 0 && qos <= 2 ? qos : 0,
+                retian: args.retain === true || args.retain === '1' || args.retain === 'true'
+            };
 
             this.logmodule.writelog('debug', "publish_options: " + JSON.stringify(publish_options));
 
@@ -321,7 +314,7 @@ class brokerMQTT {
             this.logmodule.writelog('error', "sendMessageToTopic: " + err);
         }
     }
-
+ 
    /**
     * getConnectedClient - description
     *
