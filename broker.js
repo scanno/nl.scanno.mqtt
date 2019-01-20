@@ -263,7 +263,7 @@ class brokerMQTT {
             let qos = typeof args.qos === 'string' ? parseInt(args.qos) : args.qos;
             let publish_options = {
                 qos: qos && qos >= 0 && qos <= 2 ? qos : 0,
-                retian: args.retain === true || args.retain === '1' || args.retain === 'true'
+                retain: args.retain === true || args.retain === '1' || args.retain === 'true'
             };
 
             this.logmodule.writelog('debug', "publish_options: " + JSON.stringify(publish_options));
