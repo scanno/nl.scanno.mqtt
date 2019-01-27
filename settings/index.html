@@ -72,12 +72,21 @@
         </fieldset>
         </form>
 
-        <p data-i18n="settings.app.log.title"></p>
-        <button class="right" id="button_getlog" onclick="showLogLines()" data-i18n="settings.app.button.getlogs">Get Logs</button>
-        <div id="loglines"></div>
+        <div>
+          <button class="left" id="button_save" onclick="save()" data-i18n="settings.app.button.save">Save Settings</button>
+        </div>
 
-<!--        <button class="right" id="button_test" onclick="test()" data-i18n="settings.app.button.test">Test</button>  -->
-        <button class="right" id="button_save" onclick="save()" data-i18n="settings.app.button.save">Save</button>
+        <br/>
+        <br/>
+        <form>
+          <fieldset>
+            <legend>
+                <label data-i18n="settings.app.log.title"></label>
+            </legend>
+            <div id="loglines"></div>
+        </fieldset>
+       </form>
+       <button type="button" class="right" id="button_getlog" onclick="showLogLines()" data-i18n="settings.app.button.getlogs">Get Logs</button>
 
         <script type="text/javascript">
 

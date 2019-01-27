@@ -27,7 +27,7 @@
             },
 
             "button" : {
-                "save" : "Opslaan",
+                "save" : "Opslaan Instellingen",
                 "test" : "Test",
                 "getlogs" : "Log ophalen"
             },

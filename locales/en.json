@@ -26,7 +26,7 @@
             },
 
             "button" : {
-                "save" : "Save",
+                "save" : "Save Settings",
                 "test" : "Test",
                 "getlogs" : "Get logs"
             },
