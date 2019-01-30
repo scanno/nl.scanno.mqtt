@@ -122,6 +122,19 @@ class TopicArray {
   }
 
   /**
+   * active - checks if the given topic is registered.
+   *
+   * @param  {string} topic name of the topic
+   * @return {boolean}       true when topic is registered, false Otherwise   
+   */
+  active(topic) {
+    if (this.exists(topic)) {
+      return this.getTopic(topic).isRegistered();
+    }
+    return false;
+  }
+
+  /**
    * addApiTopic - description
    *
    * @param  {string} topic  Name of the topic to add to the api array

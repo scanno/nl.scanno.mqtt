@@ -85,11 +85,13 @@ class brokerMQTT {
     */
    connectToBroker(args, state) {
       const ref = this;
-      if (this.connectedClient == null) {
+      if (this.connectedClient == null && ref.brokerState !== "CONNECTING") {
          this.logmodule.writelog("connectedClient == null");
          try {
+           ref.brokerState = 'CONNECTING';
            this.connectedClient = mqtt.connect(this.getBrokerURL(), this.getConnectOptions());
          } catch(err) {
+           ref.brokerState = "DISCONNECTED";
            ref.logmodule.writelog('error', "connectToBroker: " +err);
          }
 
@@ -152,34 +154,23 @@ class brokerMQTT {
     * @return {type}           description
     */
    subscribeToTopic(topicName, callback, api) {
-      if (!this.topicArray.exists(topicName)) {  // || !this.topicArray.getTopic(topicName).isRegistered()) {
+      if (!this.topicArray.active(topicName)) {
          // Connect if no client available
          if (this.connectedClient == null) {
                this.connectToBroker();
          }
 
-         if (api) {
-           this.logmodule.writelog('info', "subscribing to api topic " + topicName);
-           this.topicArray.addApiTopic(topicName);
-         } else {
-           this.logmodule.writelog('info', "subscribing to trigger topic " + topicName);
-           this.topicArray.addTriggerTopic(topicName);
-         }
-//         let loadingTopic = undefined;
-
-         // Keep a register of callbacks to call when successfully subscribed to the topic
-/*         if (callback) {
-               this.loadingTopics = this.loadingTopics || new Map();
-               loadingTopic = this.loadingTopics.get(topicName);
-               if (loadingTopic) {
-                   loadingTopic.push(topicName);
-               } else {
-                   this.loadingTopics.set(topicName, [callback]);
-               }
+         if (!this.topicArray.exists(topicName)) {
+           if (api) {
+             this.logmodule.writelog('info', "subscribing to api topic " + topicName);
+             this.topicArray.addApiTopic(topicName);
+           } else {
+             this.logmodule.writelog('info', "subscribing to trigger topic " + topicName);
+             this.topicArray.addTriggerTopic(topicName);
            }
-*/
-           // First topic registration?
-//         if (!loadingTopic) {
+         }
+
+         // First topic registration?
          if (!this.topicArray.getTopic(topicName).isRegistered()) {
             // Subscribe to topic
             this.connectedClient.subscribe(topicName, (error) => {
@@ -190,6 +181,7 @@ class brokerMQTT {
                  if (this.topicArray.getTopic(topicName) !== null) {
                    if (!this.topicArray.getTopic(topicName).getRegistered()) {
                       this.topicArray.remove(topicName);
+                      this.logmodule.writelog('debug', "Removed from topiclist: " + topicName);
                    }
                  }
               } else {
@@ -197,20 +189,6 @@ class brokerMQTT {
                 this.topicArray.getTopic(topicName).setRegistered(true);
                 this.logmodule.writelog('info', "successfully subscribed to topic " + topicName);
               }
-
-              // execute callbacks
-//              if (this.loadingTopics) {
-//                let callbacks = this.loadingTopics.get(topicName);
-//                if (callbacks) {
-//                  this.loadingTopics.delete(topicName);
-//                    for (let i = 0; i < callbacks.length; i++) {
-//                      let cb = callbacks[i];
-//                      if (cb && typeof cb === 'function') {
-//                        cb(error, {});
-//                      }
-//                   }
-//                 }
-//              }
            });
          }
        } else { // already registered
