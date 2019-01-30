@@ -1,5 +1,6 @@
 const mqtt      = require("mqtt/node_modules/mqtt");
-var TopicArray = require("./Topics.js")
+var TopicArray = require("./Topics.js");
+var SendQueue = require("./SendQueue.js");
 var handleMQTT = require("./messagehandling.js");
 
 class brokerMQTT {
@@ -11,6 +12,7 @@ class brokerMQTT {
       this.connectedClient = null;
 
       this.topicArray = new TopicArray();
+      this.sendqueue = new SendQueue();
 
       this.brokerState = "DISCONNECTED";
       this.errorOccured = false;
@@ -60,7 +62,7 @@ class brokerMQTT {
 
        var lwt_struct = {};
        lwt_struct.topic = clientID+"/status";
-       lwt_struct.payload = "Offline";
+       lwt_struct.payload = "MQTT client Offline";
        lwt_struct.qos = 0;
        lwt_struct.retain = true;
 
@@ -137,6 +139,12 @@ class brokerMQTT {
             ref.logmodule.writelog('info', "MQTT client connected");
             ref.logmodule.writelog('info', "Connected Topics: " + ref.getTopicArray().getTriggerTopics());
             ref.logmodule.writelog('info', "Broker State: " + ref.brokerState);
+
+            // try to empty SendQueue
+            while (!ref.sendqueue.isEmpty()) {
+              ref.logmodule.writelog('debug', "sending queued messages");
+              ref.sendMessageToTopic(ref.sendqueue.removeMessage());
+            }
          });
 
          this.connectedClient.on('message',function(topic, message, packet) {
@@ -212,17 +220,7 @@ class brokerMQTT {
     sendMessageToTopic(args) {
         this.logmodule.writelog('info', "SendMessageToTopic called");
         this.logmodule.writelog('debug', "SendMessageToTopic: " + JSON.stringify(args));
-        this.logmodule.writelog('debug', "qos: " + parseInt(args.qos));
-
-        // Check max number of retries to prevend endless loops
-        if (args.retries > 0) {
-            if (args.retries--) {
-                this.logmodule.writelog('info', "Retry sending message");
-            } else {
-                this.logmodule.writelog('info', "Skip sending message: max retries reached");
-                return;
-            }
-        }
+//        this.logmodule.writelog('debug', "qos: " + parseInt(args.qos));
 
         // validate
         if (!args) {
@@ -254,36 +252,19 @@ class brokerMQTT {
             this.logmodule.writelog('debug', "publish_options: " + JSON.stringify(publish_options));
 
             // Check if there is already a connection  to the broker
-            if (!this.connectedClient || this.connecting) {
-
-                // add message to unsend queue
-                this.queue = this.queue || [];
-                this.queue.push(args);
-
-                this.logmodule.writelog('debug', "connecting: added message to queue");
+            if (!this.connectedClient || this.brokerState === "CONNECTING") {
 
                 // There is no connection, so create a connection and send the message
-                if (!this.connecting) {
-                    this.connecting = true; // set flag to prevent concurrent connection attempts
+                if (this.brokerState !== "CONNECTING") {
                     this.logmodule.writelog('info', "Broker not connected, attempting connection");
                     this.connectToBroker(args);
-                    this.connectedClient.on('connect', () => {
-                        this.connecting = false; // reset
 
-                        // send queued messages
-                        for (let i = 0; i < this.queue.length; i++) {
-                            let a = this.queue[i];
-                            if (a.retries === undefined) {
-                                a.retries = 3; // max retries
-                            }
-                            this.sendMessageToTopic(a); // NOTE: recursive
-                        }
-                        // reset queue
-                        this.queue = undefined;
-                    });
                 } else {
                     this.logmodule.writelog('info', "Broker not available, waiting for connection");
                 }
+                // add message to the senqueue.
+                this.sendqueue.addMessage(args);
+
             } else {
                 // parse objects to string
                 if (args.mqttMessage && typeof args.mqttMessage !== 'string') {
