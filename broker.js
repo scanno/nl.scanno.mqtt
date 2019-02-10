@@ -286,6 +286,7 @@ class brokerMQTT {
                         this.connecting = false; // reset
 
                         // send queued messages
+                        this.queue = this.queue || []; // NOTE: Queue can be empty if broker is restarted
                         for (let i = 0; i < this.queue.length; i++) {
                             let a = this.queue[i];
                             if (a.retries === undefined) {
