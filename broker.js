@@ -260,7 +260,7 @@ class brokerMQTT {
 
             } else {
                 // parse objects to string
-                if (args.mqttMessage && typeof args.mqttMessage !== 'string') {
+                if (args.mqttMessage && typeof args.mqttMessage !== 'string' && typeof args.mqttMessage !== null) {
                     args.mqttMessage = JSON.stringify(args.mqttMessage);
                 }
 
