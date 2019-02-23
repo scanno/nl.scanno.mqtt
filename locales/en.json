@@ -21,8 +21,10 @@
                 "username" : "Username for the broker",
                 "password" : "Password for the broker",
                 "custom_clientid": "Enable to provide a custom Client ID that is used when connecting to the broker.",
-                "clientid" : "Client ID"
-
+                "clientid" : "Client ID",
+                "use_lwt" : "Use LWT",
+                "lwt_topic" : "LWT topic",
+                "lwt_message" : "LWT message"
             },
 
             "button" : {

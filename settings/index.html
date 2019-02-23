@@ -68,6 +68,21 @@
                <input class="form_input" id="clientid" type="text" value="" /> <br>
            </div>
 
+           <div class="field">
+             <input class="checkbox" id="use_lwt" type="checkbox" checked="false"
+                onchange="owntracks.lwt_topic.disabled = !checked;owntracks.lwt_message.disabled = !checked">
+             <label class="form_label" for="use_lwt" data-i18n="settings.app.server.use_lwt"</label>
+           </div>
+           <div class="field row">
+               <label class="form_label" for="lwt_topic" data-i18n="settings.app.server.lwt_topic"></label>
+               <br>
+               <input class="form_input" id="lwt_topic" type="text" value="" /> <br>
+           </div>
+           <div class="field row">
+               <label class="form_label" for="lwt_message" data-i18n="settings.app.server.lwt_message"></label>
+               <br>
+               <input class="form_input" id="lwt_message" type="text" value="" /> <br>
+           </div>
 
         </fieldset>
         </form>
@@ -178,6 +193,35 @@
                   }
            })
 
+           Homey.get('use_lwt', function(err, use_lwt) {
+                  if (err) {
+                    console.error(err)
+                  } else {
+                    document.getElementById('use_lwt').value = use_lwt;
+                  }
+                  if (typeof use_lwt == 'undefined' || use_lwt == null) use_lwt = false;
+                  document.getElementById('use_lwt').checked = use_lwt;
+                  document.getElementById('lwt_topic').disabled = !use_lwt;
+                  document.getElementById('lwt_message').disabled = !use_lwt;
+                  currentValues.use_lwt = use_lwt;
+           })
+           Homey.get('lwt_topic', function(err, lwt_topic) {
+                  if (err) {
+                    console.error(err)
+                  } else {
+                    document.getElementById('lwt_topic').value = lwt_topic;
+                    currentValues.lwt_topic = lwt_topic;
+                  }
+           })
+           Homey.get('lwt_message', function(err, lwt_message) {
+                  if (err) {
+                    console.error(err)
+                  } else {
+                    document.getElementById('lwt_message').value = lwt_message;
+                    currentValues.lwt_message = lwt_message;
+                  }
+           })
+
            Homey.ready();
         }
 
@@ -247,6 +291,28 @@
                 HomeyAPI.set('clientid', document.getElementById('clientid').value);
                 valuesHaveBeenChanged = true;
                 currentValues.clientid = document.getElementById('clientid').value;
+            }
+
+            // LWT
+            if (currentValues.use_lwt != document.getElementById('use_lwt').checked) {
+                console.log("use_lwt has been changed");
+                HomeyAPI.set('use_lwt', document.getElementById('use_lwt').checked);
+                valuesHaveBeenChanged = true;
+                currentValues.use_lwt = document.getElementById('use_lwt').checked;
+            }
+
+            if (currentValues.lwt_topic != document.getElementById('lwt_topic').value) {
+                console.log("lwt_topic has been changed");
+                HomeyAPI.set('lwt_topic', document.getElementById('lwt_topic').value);
+                valuesHaveBeenChanged = true;
+                currentValues.lwt_topic = document.getElementById('lwt_topic').value;
+            }
+
+            if (currentValues.lwt_message != document.getElementById('lwt_message').value) {
+                console.log("lwt_message has been changed");
+                HomeyAPI.set('lwt_message', document.getElementById('lwt_message').value);
+                valuesHaveBeenChanged = true;
+                currentValues.lwt_message = document.getElementById('lwt_message').value;
             }
 
             if (valuesHaveBeenChanged == true) {

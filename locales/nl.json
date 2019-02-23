@@ -23,7 +23,10 @@
                 "username" : "Gebruikersnaam",
                 "password" : "Wachtwoord",
                 "custom_clientid": "Geef zelf een eigen Client ID op welke wordt gebruikt bij de verbinding met de broker.",
-                "clientid" : "Client ID"
+                "clientid" : "Client ID",
+                "use_lwt" : "Gebruik LWT",
+                "lwt_topic" : "Topic voor LWT",
+                "lwt_message" : "LWT bericht"
             },
 
             "button" : {
