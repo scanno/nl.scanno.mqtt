@@ -45,6 +45,7 @@ module.exports = [{
    requires_authorization: true,
    fn: function (args, callback) {
       console.log("API: Incoming POST on /send/");
+      if (!Homey.app) return callback("too soon");
       var result = Homey.app.sendMessage(args);
       if (result instanceof Error) callback(result);
       callback(null, result);
@@ -57,7 +58,7 @@ module.exports = [{
    requires_authorization: true,
    fn: function (args, callback) {
        console.log("API: Incoming POST on /subscribe/");
+       if (!Homey.app) return callback("too soon");
        Homey.app.subscribeToTopic(args.body.topic, callback);
     }
 }];
-

@@ -61,8 +61,23 @@ class brokerMQTT {
        this.logmodule.writelog('info', "clientID = "+ clientID);
 
        var lwt_struct = {};
-       lwt_struct.topic = clientID+"/status";
-       lwt_struct.payload = "MQTT client Offline";
+       var lwt_topic = this.Homey.ManagerSettings.get('lwt_topic');
+       var lwt_message = this.Homey.ManagerSettings.get('lwt_message');
+
+       if (lwt_topic) {
+         this.logmodule.writelog('debug', "lwt_topic = "+ lwt_topic);
+         lwt_struct.topic = lwt_topic;
+       } else {
+          lwt_struct.topic = clientID+"/status";
+          this.logmodule.writelog('debug', "lwt_topic = "+ lwt_struct.topic);
+       }
+       if (lwt_message) {
+         this.logmodule.writelog('debug', "lwt_message = "+ lwt_message);
+         lwt_struct.payload = lwt_message;
+       } else {
+         lwt_struct.payload = "MQTT client Offline";
+         this.logmodule.writelog('debug', "lwt_message = "+ lwt_struct.payload);
+       }
        lwt_struct.qos = 0;
        lwt_struct.retain = true;
 
@@ -72,7 +87,12 @@ class brokerMQTT {
        connect_options.password = this.Homey.ManagerSettings.get('password');
        connect_options.rejectUnauthorized = rejectUnauth;
        connect_options.clientId = clientID;
-       connect_options.will = lwt_struct;
+       // If LWT is enabled, add lwt struct
+       if ( this.Homey.ManagerSettings.get('use_lwt') == true) {
+         this.logmodule.writelog('debug', "lwt_truct = "+ JSON.stringify(lwt_struct));
+         connect_options.will = lwt_struct;
+       }
+//       connect_options.protocolVersion = 3;
 
        this.logmodule.writelog('info', "rejectUnauthorized: " + connect_options.rejectUnauthorized);
        return connect_options;
@@ -273,7 +293,7 @@ class brokerMQTT {
             this.logmodule.writelog('error', "sendMessageToTopic: " + err);
         }
     }
- 
+
    /**
     * getConnectedClient - description
     *
