@@ -59,7 +59,7 @@
                      "en": "Message received from topic",
                      "nl": "Bericht ontvangen via topic"
                   },
-                  "example": "Received message that can contain anything"
+                  "example": "Received message"
                },
                {
                   "name": "topic",
