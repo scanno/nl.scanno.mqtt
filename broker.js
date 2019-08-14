@@ -207,7 +207,7 @@ class brokerMQTT {
                  this.logmodule.writelog('error', "failed to subscribed to topic " + topicName);
                  this.logmodule.writelog('error', error);
                  if (this.topicArray.getTopic(topicName) !== null) {
-                   if (!this.topicArray.getTopic(topicName).getRegistered()) {
+                   if (!this.topicArray.getTopic(topicName).isRegistered()) {
                       this.topicArray.remove(topicName);
                       this.logmodule.writelog('debug', "Removed from topiclist: " + topicName);
                    }
@@ -280,7 +280,7 @@ class brokerMQTT {
 
             } else {
                 // parse objects to string
-                if (args.mqttMessage && typeof args.mqttMessage !== 'string') {
+                if (args.mqttMessage && typeof args.mqttMessage !== 'string' && typeof args.mqttMessage !== null) {
                     args.mqttMessage = JSON.stringify(args.mqttMessage);
                 }
 
@@ -329,3 +329,4 @@ class brokerMQTT {
 }
 
 module.exports = brokerMQTT;
+
