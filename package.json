@@ -1,6 +1,6 @@
 {
   "name": "nl.scanno.mqtt",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "description": "MQTT Client",
   "main": "app.js",
   "dependencies": {
