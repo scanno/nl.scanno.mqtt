@@ -44,7 +44,7 @@
       "large":"./assets/images/large.jpg",
       "small":"./assets/images/small.jpg"
    },
-   "brandColor": "#11111F",
+   "brandColor": "#1BCACA",
    "flow": {
       "triggers": [
          {
