@@ -5,7 +5,8 @@ class triggerMQTT {
    constructor (app) {
       this.broker    = app.broker
       this.logmodule = app.logmodule;
-      this.Homey     = require('homey');
+      //this.Homey     = require('homey');
+      this.Homey = app.homey;
       this.eventMQTT = null;
       this.OnInit();
    }
@@ -19,8 +20,9 @@ class triggerMQTT {
 
    listenForMessage() {
       // Start listening for the events.
-      this.eventMQTT = new this.Homey.FlowCardTrigger('eventMQTT');
-      this.eventMQTT.register();
+      //this.eventMQTT = new this.Homey.FlowCardTrigger('eventMQTT');
+      this.eventMQTT = this.Homey.flow.getTriggerCard('eventMQTT');
+      //this.eventMQTT.register();
 
       this.eventMQTT.registerRunListener((args, state ) => {
          this.logmodule.writelog('info', "Listener eventMQTT called");

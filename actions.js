@@ -6,7 +6,8 @@ class actionsMQTT {
       this.broker = app.broker;
       this.publishMQTT = null;
       this.sayString = null;
-      this.Homey = require('homey');
+//      this.Homey = require('homey');
+      this.Homey = app.homey;
       this.OnInit();
    }
 
@@ -20,13 +21,16 @@ class actionsMQTT {
 
       // Put all the action trigger here for registering them and executing the action
 
-      this.publishMQTT = new this.Homey.FlowCardAction('publishMQTT');
-      this.publishMQTT_Adv = new this.Homey.FlowCardAction('publishMQTT_Adv');
-      this.sayString = new this.Homey.FlowCardAction('sayString');
+      //this.publishMQTT = new this.Homey.FlowCardAction('publishMQTT');
+      this.publishMQTT = this.Homey.flow.getActionCard('publishMQTT');
+      //this.publishMQTT_Adv = new this.Homey.FlowCardAction('publishMQTT_Adv');
+      this.publishMQTT_Adv = this.Homey.flow.getActionCard('publishMQTT_Adv');
+      //this.sayString = new this.Homey.FlowCardAction('sayString');
+      this.sayString = this.Homey.flow.getActionCard('sayString');
 
-      this.publishMQTT.register();
-      this.publishMQTT_Adv.register();
-      this.sayString.register();
+      //this.publishMQTT.register();
+      //this.publishMQTT_Adv.register();
+      //this.sayString.register();
 
       // Put all the action trigger here for registering them and executing the action
       // Action for sending a message to the broker on the specified topic
