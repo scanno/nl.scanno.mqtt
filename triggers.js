@@ -70,6 +70,15 @@ class triggerMQTT {
       }
   }
 
+  topicMatches(topic, pattern) {
+    this.logmodule.writelog ('info', "topic: "+topic+" pattern: "+pattern);
+    const regex = new RegExp('^' + pattern.replace(/\+/, '[^/]+').replace(/#/, '.+') + '$');
+    var result = regex.test(topic);
+    this.logmodule.writelog ('info', "regex test result: "+result);
+    return result;
+  }
+
+
    processMessage(args, state) {
       var reconnectClient = false;
 
@@ -80,11 +89,18 @@ class triggerMQTT {
 
       this.logmodule.writelog ('info', "state.topic = " + state.triggerTopic + " topic = " + args.mqttTopic)
 
+      if (this.topicMatches(state.triggerTopic, args.mqttTopic)) {
+        console.log ("triggerTopic = equal" )
+        return true;
+      } else {
+        this.logmodule.writelog('info', "We are not waiting for this topic");
+        return false;
+      }
       // MQTT subscription topics can contain "wildcards", i.e a + sign. However the topic returned
       // by MQTT brokers contain the topic where the message is posted on. In that topic, the wildcard
       // is replaced by the actual value. So we will have to take into account any wildcards when matching the topics.
 
-      var arrTriggerTopic = state.triggerTopic.split('/');
+/*      var arrTriggerTopic = state.triggerTopic.split('/');
       var arrMQTTTopic = args.mqttTopic.split('/');
       var matchTopic = true;
       var hashWildcard = false;
@@ -112,6 +128,7 @@ class triggerMQTT {
       // This is not the topic I was waiting for and it is a known topic
       this.logmodule.writelog('info', "We are not waiting for this topic");
       return false;
+*/
    }
 
    setArgumentChangeEvent() {

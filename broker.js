@@ -1,4 +1,4 @@
-const mqtt      = require("mqtt/node_modules/mqtt");
+const mqtt      = require("mqtt");
 var TopicArray = require("./Topics.js");
 var SendQueue = require("./SendQueue.js");
 var handleMQTT = require("./messagehandling.js");
@@ -329,4 +329,3 @@ class brokerMQTT {
 }
 
 module.exports = brokerMQTT;
-
