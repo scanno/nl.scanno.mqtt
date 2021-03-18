@@ -71,6 +71,13 @@ class triggerMQTT {
   }
 
   topicMatches(topic, pattern) {
+    // MQTT subscription topics can contain "wildcards", i.e a + sign. However the topic returned
+    // by MQTT brokers contain the topic where the message is posted on. In that topic, the wildcard
+    // is replaced by the actual value. So we will have to take into account any wildcards when matching the topics.
+    // MQTT subscription topics can contain "wildcards", i.e a + sign. However the topic returned
+    // by MQTT brokers contain the topic where the message is posted on. In that topic, the wildcard
+    // is replaced by the actual value. So we will have to take into account any wildcards when matching the topics.
+
     this.logmodule.writelog ('info', "topic: "+topic+" pattern: "+pattern);
     const regex = new RegExp('^' + pattern.replace(/\+/, '[^/]+').replace(/#/, '.+') + '$');
     var result = regex.test(topic);
@@ -96,39 +103,6 @@ class triggerMQTT {
         this.logmodule.writelog('info', "We are not waiting for this topic");
         return false;
       }
-      // MQTT subscription topics can contain "wildcards", i.e a + sign. However the topic returned
-      // by MQTT brokers contain the topic where the message is posted on. In that topic, the wildcard
-      // is replaced by the actual value. So we will have to take into account any wildcards when matching the topics.
-
-/*      var arrTriggerTopic = state.triggerTopic.split('/');
-      var arrMQTTTopic = args.mqttTopic.split('/');
-      var matchTopic = true;
-      var hashWildcard = false;
-
-      for (var value in arrTriggerTopic) {
-         this.logmodule.writelog('debug', "arrTriggerTopic["+value+"] = "+arrMQTTTopic[value]);
-         if (arrMQTTTopic[value] === '#') {
-            this.logmodule.writelog('debug', "hashWildcard set to true because # detected");
-            hashWildcard = true;
-         }
-         if ((arrTriggerTopic[value] !== arrMQTTTopic[value]) && (arrMQTTTopic[value] !== '+')) {
-            // This is a bit dirty because it would allow events to be delivered also to topics that do not have
-            // the trailing event. In de future, when allowing the other message types, this would cause problems
-            if ((arrMQTTTopic[value] !== undefined) && (hashWildcard == false)) {
-               matchTopic = false;
-            }
-         }
-      }
-
-      // If the topic that triggered me the topic I was waiting for?
-      if (matchTopic == true) {
-         console.log ("triggerTopic = equal" )
-         return true;
-      }
-      // This is not the topic I was waiting for and it is a known topic
-      this.logmodule.writelog('info', "We are not waiting for this topic");
-      return false;
-*/
    }
 
    setArgumentChangeEvent() {
