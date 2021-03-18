@@ -44,6 +44,7 @@
       "large":"./assets/images/large.jpg",
       "small":"./assets/images/small.jpg"
    },
+   "brandColor": "#11111F",
    "flow": {
       "triggers": [
          {
@@ -51,6 +52,10 @@
             "title": {
                "en": "Receive topic triggers",
                "nl": "Ontvang topic triggers"
+            },
+            "titleFormatted": {
+              "en": "Trigger when a message is received on [[mqttTopic]]",
+              "nl": "Trigger wanneer een bericht is ontvnagen op [[mqttTopic]]"
             },
             "tokens": [
                {
@@ -89,6 +94,10 @@
                "en": "Publish message",
                "nl": "Stuur bericht"
             },
+            "titleFormatted": {
+              "en": "Send [[mqttMessage]] on topic [[mqttTopic]]",
+              "nl": "Verstuur [[mqttMessage]] op topic [[mqttTopic]]"
+            },
             "args":[
                {
                   "name": "mqttMessage",
@@ -113,6 +122,10 @@
             "title": {
                "en": "Publish message (advanced)",
                "nl": "Stuur bericht (uitgebreid)"
+            },
+            "titleFormatted": {
+              "en": "Send [[mqttMessage]] on topic [[mqttTopic]] with QoS: [[qos]] and retain: [[retain]]",
+              "nl": "Verstuur [[mqttMessage]] op topic [[mqttTopic]] met QoS: [[qos]] en retain [[retain]]"
             },
             "args":[
                {
@@ -193,6 +206,10 @@
             "title": {
                "en": "Say the received string through homeys speaker",
                "nl": "Speel de ontvangen string af via homys interne speaker"
+            },
+            "titleFormatted": {
+              "en": "Speak [[voiceString]] through speaker",
+              "nl": "Spreek [[voiceString]] uit over de luidspreker"
             },
             "args": [
                {
