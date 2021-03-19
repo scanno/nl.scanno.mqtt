@@ -1,227 +1,249 @@
 {
-   "id": "nl.scanno.mqtt",
-   "name": {
-      "en": "MQTT Client",
-      "nl": "MQTT Client"
-   },
-   "description": {
-      "en": "Subscripe to MQTT topics",
-      "nl": "Abonneer op MQTT topics"
-   },
-   "version": "2.3.0",
-   "sdk": 3,
-   "compatibility": ">=5.0.0",
-   "category": [
-      "internet"
-   ],
-   "permissions": [
-       "homey:manager:speech-output"
-   ],
-   "author": {
-      "name": "Menno van Grinsven",
-      "email": "mgrinsven@gmail.com"
-   },
-   "contributors": {
-      "developers": [
-        {
-          "name": "Menno van Grinsven",
-          "email": "mgrinsven@gmail.com"
+  "id": "nl.scanno.mqtt",
+  "name": {
+    "en": "MQTT Client",
+    "nl": "MQTT Client"
+  },
+  "description": {
+    "en": "Subscripe to MQTT topics",
+    "nl": "Abonneer op MQTT topics"
+  },
+  "version": "2.4.0",
+  "sdk": 3,
+  "compatibility": ">=5.0.0",
+  "category": [
+    "internet"
+  ],
+  "permissions": [
+    "homey:manager:speech-output"
+  ],
+  "author": {
+    "name": "Menno van Grinsven",
+    "email": "mgrinsven@gmail.com"
+  },
+  "contributors": {
+    "developers": [
+      {
+        "name": "Menno van Grinsven",
+        "email": "mgrinsven@gmail.com"
+      },
+      {
+        "name": "Harrie de Groot",
+        "email": "harriedegroot@gmail.com"
+      }
+    ]
+  },
+  "contributing": {
+    "donate": {
+      "paypal": {
+        "username": "scanno"
+      }
+    }
+  },
+  "images": {
+    "large": "./assets/images/large.jpg",
+    "small": "./assets/images/small.jpg"
+  },
+  "brandColor": "#1BCACA",
+  "flow": {
+    "triggers": [
+      {
+        "id": "eventMQTT",
+        "title": {
+          "en": "Receive topic triggers",
+          "nl": "Ontvang topic triggers"
         },
-        {
-            "name": "Harrie de Groot",
-            "email": "harriedegroot@gmail.com"
-        }
-      ]
-   },
-   "contributing": {
-		"donate": {
-			"paypal": {
-				"username": "scanno"
-			}
-		}
-	},
-   "images":{
-      "large":"./assets/images/large.jpg",
-      "small":"./assets/images/small.jpg"
-   },
-   "brandColor": "#1BCACA",
-   "flow": {
-      "triggers": [
-         {
-            "id": "eventMQTT",
+        "titleFormatted": {
+          "en": "Trigger when a message is received on [[mqttTopic]]",
+          "nl": "Trigger wanneer een bericht is ontvnagen op [[mqttTopic]]"
+        },
+        "tokens": [
+          {
+            "name": "message",
             "title": {
-               "en": "Receive topic triggers",
-               "nl": "Ontvang topic triggers"
+              "en": "Message received from topic",
+              "nl": "Bericht ontvangen via topic"
             },
-            "titleFormatted": {
-              "en": "Trigger when a message is received on [[mqttTopic]]",
-              "nl": "Trigger wanneer een bericht is ontvnagen op [[mqttTopic]]"
-            },
-            "tokens": [
-               {
-                  "name": "message",
-                  "title": {
-                     "en": "Message received from topic",
-                     "nl": "Bericht ontvangen via topic"
-                  },
-                  "example": "Received message"
-               },
-               {
-                  "name": "topic",
-                  "title": {
-                     "en": "Name Topic",
-                     "nl": "Naam Topic"
-                  },
-                  "example": "broker/+/something/#"
-               }
-            ],
-            "args":[
-	       {
-	          "name": "mqttTopic",
-                  "type": "text",
-                  "placeholder": {
-                     "en": "Topic",
-                     "nl": "Topic"
-                  }
-	       }
-            ]
-         }
-      ],
-      "actions": [
-         {
-            "id": "publishMQTT",
+            "example": "Received message"
+          },
+          {
+            "name": "topic",
             "title": {
-               "en": "Publish message",
-               "nl": "Stuur bericht"
+              "en": "Name Topic",
+              "nl": "Naam Topic"
             },
-            "titleFormatted": {
-              "en": "Send [[mqttMessage]] on topic [[mqttTopic]]",
-              "nl": "Verstuur [[mqttMessage]] op topic [[mqttTopic]]"
-            },
-            "args":[
-               {
-                  "name": "mqttMessage",
-                  "type": "text",
-                  "placeholder": {
-                     "en": "Message",
-                      "nl": "Bericht"
-                  }
-               },
-               {
-                  "name": "mqttTopic",
-                  "type": "text",
-                  "placeholder": {
-                     "en": "Topic",
-                     "nl": "Topic"
-                  }
-               }
-            ]
-         },
-         {
-            "id": "publishMQTT_Adv",
+            "example": "broker/+/something/#"
+          }
+        ],
+        "args": [
+          {
+            "name": "mqttTopic",
+            "type": "text",
+            "placeholder": {
+              "en": "Topic",
+              "nl": "Topic"
+            }
+          }
+        ]
+      }
+    ],
+    "actions": [
+      {
+        "id": "publishMQTT",
+        "title": {
+          "en": "Publish message",
+          "nl": "Stuur bericht"
+        },
+        "titleFormatted": {
+          "en": "Send [[mqttMessage]] on topic [[mqttTopic]]",
+          "nl": "Verstuur [[mqttMessage]] op topic [[mqttTopic]]"
+        },
+        "args": [
+          {
+            "name": "mqttMessage",
+            "type": "text",
+            "placeholder": {
+              "en": "Message",
+              "nl": "Bericht"
+            }
+          },
+          {
+            "name": "mqttTopic",
+            "type": "text",
+            "placeholder": {
+              "en": "Topic",
+              "nl": "Topic"
+            }
+          }
+        ]
+      },
+      {
+        "id": "publishMQTT_Adv",
+        "title": {
+          "en": "Publish message (advanced)",
+          "nl": "Stuur bericht (uitgebreid)"
+        },
+        "titleFormatted": {
+          "en": "Send [[mqttMessage]] on topic [[mqttTopic]] with QoS: [[qos]] and retain: [[retain]]",
+          "nl": "Verstuur [[mqttMessage]] op topic [[mqttTopic]] met QoS: [[qos]] en retain [[retain]]"
+        },
+        "args": [
+          {
+            "name": "mqttMessage",
+            "type": "text",
+            "placeholder": {
+              "en": "Message",
+              "nl": "Bericht"
+            }
+          },
+          {
+            "name": "mqttTopic",
+            "type": "text",
+            "placeholder": {
+              "en": "Topic",
+              "nl": "Topic"
+            }
+          },
+          {
+            "name": "qos",
+            "type": "dropdown",
             "title": {
-               "en": "Publish message (advanced)",
-               "nl": "Stuur bericht (uitgebreid)"
+              "en": "Quality of Service",
+              "nl": "Quality of Service"
             },
-            "titleFormatted": {
-              "en": "Send [[mqttMessage]] on topic [[mqttTopic]] with QoS: [[qos]] and retain: [[retain]]",
-              "nl": "Verstuur [[mqttMessage]] op topic [[mqttTopic]] met QoS: [[qos]] en retain [[retain]]"
-            },
-            "args":[
-               {
-                  "name": "mqttMessage",
-                  "type": "text",
-                  "placeholder": {
-                     "en": "Message",
-                      "nl": "Bericht"
-                  }
+            "values": [
+              {
+                "id": "0",
+                "label": {
+                  "en": "QoS 0",
+                  "nl": "QoS 0"
+                }
               },
               {
-                 "name": "mqttTopic",
-                 "type": "text",
-                 "placeholder": {
-                    "en": "Topic",
-                    "nl": "Topic"
-                 }
+                "id": "1",
+                "label": {
+                  "en": "QoS 1",
+                  "nl": "QoS 1"
+                }
               },
               {
-                 "name": "qos",
-                 "type": "dropdown",
-                 "title": {
-                    "en": "Quality of Service",
-                    "nl": "Quality of Service"
-                 },
-                 "values": [
-                    {
-                       "id": "0",
-                       "label": {
-                          "en": "QoS 0",
-                          "nl": "QoS 0"
-                       }
-                    },
-                    {
-                       "id": "1",
-                       "label": {
-                          "en": "QoS 1",
-                          "nl": "QoS 1"
-                       }
-                    },
-                    {
-                       "id": "2",
-                       "label": {
-                          "en": "QoS 2",
-                          "nl": "QoS 2"
-                       }
-                    }
-                 ]
-              },
-              {
-                 "name": "retain",
-                 "type": "dropdown",
-                 "title": {
-                    "en": "Use retain",
-                    "nl": "Gebruik retain"
-                 },
-                 "values": [
-                    {
-                       "id": "0",
-                       "label": {
-                          "en": "False",
-                          "nl": "False"
-                       }
-                    },
-                    {
-                       "id": "1",
-                       "label": {
-                          "en": "True",
-                          "nl": "True"
-                       }
-                    }
-                  ]
+                "id": "2",
+                "label": {
+                  "en": "QoS 2",
+                  "nl": "QoS 2"
+                }
               }
             ]
-         },
-         {
-            "id": "sayString",
+          },
+          {
+            "name": "retain",
+            "type": "dropdown",
             "title": {
-               "en": "Say the received string through homeys speaker",
-               "nl": "Speel de ontvangen string af via homys interne speaker"
+              "en": "Use retain",
+              "nl": "Gebruik retain"
             },
-            "titleFormatted": {
-              "en": "Speak [[voiceString]] through speaker",
-              "nl": "Spreek [[voiceString]] uit over de luidspreker"
-            },
-            "args": [
-               {
-                  "name": "voiceString",
-                  "type": "text",
-                  "placeholder": {
-                     "en": "Received string",
-                     "nl": "Ontvangen string"
-                  }
-               }
+            "values": [
+              {
+                "id": "0",
+                "label": {
+                  "en": "False",
+                  "nl": "False"
+                }
+              },
+              {
+                "id": "1",
+                "label": {
+                  "en": "True",
+                  "nl": "True"
+                }
+              }
             ]
-         }
-      ]
-   }
+          }
+        ]
+      },
+      {
+        "id": "sayString",
+        "title": {
+          "en": "Say the received string through homeys speaker",
+          "nl": "Speel de ontvangen string af via homys interne speaker"
+        },
+        "titleFormatted": {
+          "en": "Speak [[voiceString]] through speaker",
+          "nl": "Spreek [[voiceString]] uit over de luidspreker"
+        },
+        "args": [
+          {
+            "name": "voiceString",
+            "type": "text",
+            "placeholder": {
+              "en": "Received string",
+              "nl": "Ontvangen string"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "api": {
+    "testBroker": {
+      "method": "post",
+      "path": "/test/broker/"
+    },
+    "updateSettings": {
+      "method": "post",
+      "path": "/test/settingschange/"
+    },
+    "getLoglines": {
+      "method": "get",
+      "path": "/test/getloglines/"
+    },
+    "sendMessage": {
+      "method": "post",
+      "path": "/send/"
+    },
+    "subscribeTopic": {
+      "method": "post",
+      "path": "/subscribe/"
+    }
+  }
 }
