@@ -8,7 +8,8 @@ class brokerMQTT {
    constructor(app) {
       this.logmodule = app.logmodule;
       this.handleMessage = new handleMQTT(app);
-      this.Homey = require('homey');
+      //this.Homey = require('homey');
+      this.Homey = app.homey;
       this.connectedClient = null;
 
       this.topicArray = new TopicArray();
@@ -25,13 +26,13 @@ class brokerMQTT {
     */
    getBrokerURL() {
      var urlBroker = []
-     if (this.Homey.ManagerSettings.get('tls') == true) {
+     if (this.Homey.settings.get('tls') == true) {
        urlBroker.push("mqtts://");
      } else {
         urlBroker.push("mqtt://");
      };
-     urlBroker.push(this.Homey.ManagerSettings.get('url'));
-     urlBroker.push(":"+this.Homey.ManagerSettings.get('ip_port'));
+     urlBroker.push(this.Homey.settings.get('url'));
+     urlBroker.push(":"+this.Homey.settings.get('ip_port'));
      this.logmodule.writelog('info', "Broker URL: "+ urlBroker.join(''));
      return urlBroker.join('');
    }
@@ -45,24 +46,24 @@ class brokerMQTT {
     getConnectOptions() {
        var clientID = 'homey_' + Math.random().toString(16).substr(2, 8);
        var rejectUnauth = true;
-       if ( this.Homey.ManagerSettings.get('selfsigned') == true) {
+       if ( this.Homey.settings.get('selfsigned') == true) {
           rejectUnauth = false;
        }
 
-       var keepalive = parseInt(this.Homey.ManagerSettings.get('keepalive'));
+       var keepalive = parseInt(this.Homey.settings.get('keepalive'));
        if (isNaN(keepalive)) {
          keepalive = 60;
        }
        this.logmodule.writelog('info', "keepalive: " + keepalive);
 
-       if ( this.Homey.ManagerSettings.get('custom_clientid') == true) {
-          clientID = this.Homey.ManagerSettings.get('clientid');
+       if ( this.Homey.settings.get('custom_clientid') == true) {
+          clientID = this.Homey.settings.get('clientid');
        }
        this.logmodule.writelog('info', "clientID = "+ clientID);
 
        var lwt_struct = {};
-       var lwt_topic = this.Homey.ManagerSettings.get('lwt_topic');
-       var lwt_message = this.Homey.ManagerSettings.get('lwt_message');
+       var lwt_topic = this.Homey.settings.get('lwt_topic');
+       var lwt_message = this.Homey.settings.get('lwt_message');
 
        if (lwt_topic) {
          this.logmodule.writelog('debug', "lwt_topic = "+ lwt_topic);
@@ -83,12 +84,12 @@ class brokerMQTT {
 
        var connect_options = {};
        connect_options.keepalive = keepalive;
-       connect_options.username = this.Homey.ManagerSettings.get('user');
-       connect_options.password = this.Homey.ManagerSettings.get('password');
+       connect_options.username = this.Homey.settings.get('user');
+       connect_options.password = this.Homey.settings.get('password');
        connect_options.rejectUnauthorized = rejectUnauth;
        connect_options.clientId = clientID;
        // If LWT is enabled, add lwt struct
-       if ( this.Homey.ManagerSettings.get('use_lwt') == true) {
+       if ( this.Homey.settings.get('use_lwt') == true) {
          this.logmodule.writelog('debug', "lwt_truct = "+ JSON.stringify(lwt_struct));
          connect_options.will = lwt_struct;
        }

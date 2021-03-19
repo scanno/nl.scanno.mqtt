@@ -7,6 +7,7 @@ class handlingMQTT {
    constructor(app) {
       this.logmodule = app.logmodule;
       this.triggers  = app.triggers;
+      this.Homey     = app.homey;
    }
 
    /**
@@ -51,7 +52,8 @@ class handlingMQTT {
         } catch (err) {
             messageToSend = message.toString();
         }
-        ManagerApi.realtime(topic, messageToSend);
+        //ManagerApi.realtime(topic, messageToSend);
+        this.Homey.api.realtime(topic, messageToSend);
     }
 
    /**

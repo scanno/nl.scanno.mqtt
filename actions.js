@@ -69,7 +69,7 @@ class actionsMQTT {
 
    homeySayString(args) {
       try {
-         this.Homey.ManagerSpeechOutput.say(args.voiceString)
+         this.Homey.speechOutput.say(args.voiceString)
          this.logmodule.writelog("homeySayString: " +args.voiceString);
       } catch(err) {
          this.logmodule.writelog("homeySayString: " +err);
