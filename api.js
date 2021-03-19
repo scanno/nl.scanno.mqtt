@@ -1,64 +1,32 @@
-const Homey = require('homey');
 
-module.exports = [{
-   description:	'Test MQTT connection',
-   method:      'POST',
-   path:        '/test/broker/',
-   requires_authorization: true,
-   role: 'owner',
-   fn: function(args, callback) {
-      console.log("API: Incoming POST on /set/broker/");
-      var result = Homey.app.testBroker(args);
-      if( result instanceof Error ) callback( result );
-      callback( null, result );
-   }
-},
-{
-   description:	'Notify on settings changed',
-   method:      'POST',
-   path:        '/test/settingschange/',
-   requires_authorization: true,
-   role: 'owner',
-   fn: function(args, callback) {
-      console.log("API: Incoming POST on /test/settingschange/");
-      var result = Homey.app.changedSettings(args);
-      if( result instanceof Error ) callback( result );
-      callback( null, result );
-   }
-},
-{
-   description:	'Show latst 10 loglines',
-   method:      'GET',
-   path:        '/test/getloglines/',
-   requires_authorization: true,
-   role: 'owner',
-   fn: function(args, callback) {
-      console.log("API: Incoming POST on /test/getloglines/");
-      var result = Homey.app.getLogLines(args);
-      callback(null, result);
-   }
-},
-{
-   description:	'Send message to broker',
-   method:      'POST',
-   path:        '/send/',
-   requires_authorization: true,
-   fn: function (args, callback) {
-      console.log("API: Incoming POST on /send/");
-      if (!Homey.app) return callback("too soon");
-      var result = Homey.app.sendMessage(args);
-      if (result instanceof Error) callback(result);
-      callback(null, result);
-   }
-},
-{
-   description: 'Subscribe to topic, messages will be send via the realtime api',
-   method: 'POST',
-   path: '/subscribe/',
-   requires_authorization: true,
-   fn: function (args, callback) {
-       console.log("API: Incoming POST on /subscribe/");
-       if (!Homey.app) return callback("too soon");
-       Homey.app.subscribeToTopic(args.body.topic, callback);
-    }
-}];
+module.exports = {
+  async testBroker({ homey, params, body }) {
+    console.log("API: Incoming POST on /set/broker/");
+    const result = await homey.app.testBroker(params);
+    return result;
+  },
+
+  async updateSettings({ homey, params, body }) {
+    console.log("API: Incoming POST on /test/settingschange/");
+    const result = homey.app.changedSettings(body);
+    return result;
+  },
+
+  async getLoglines({ homey, query }) {
+    console.log("API: Incoming POST on /test/getloglines/");
+    const result = homey.app.getLogLines();
+    return result;
+  },
+
+  async sendMessage({ homey, params, body }) {
+    console.log("API: Incoming POST on /send/ ");
+    const result = homey.app.sendMessage(body);
+    return result;
+  },
+
+  async subscribeTopic({ homey, params, body }) {
+    console.log("API: Incoming POST on /subscribe/");
+    const result = homey.app.subscribeToTopic(body.topic);
+    return result;
+  },
+};

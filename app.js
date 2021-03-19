@@ -12,7 +12,7 @@ class MQTTApp extends Homey.App {
       Connect to the broker when the broker is used.
       Register triggers, actions and conditions
    */
-   onInit() {
+   async onInit() {
       this.logmodule = require("./logmodule.js");
       this.broker = new brokerMQTT(this);
       this.triggers = new triggerMQTT(this);
@@ -21,9 +21,8 @@ class MQTTApp extends Homey.App {
       this.broker.updateRef(this);
     }
 
-   changedSettings(args) {
+   changedSettings(body) {
       this.logmodule.writelog("changedSettings called");
-      this.logmodule.writelog(args.body);
       this.logmodule.writelog("topics:" + this.broker.getTopicArray().getTopics())
 
       if (this.broker.getTopicArray().getTopics().length > 0) {
@@ -50,17 +49,17 @@ class MQTTApp extends Homey.App {
     *                  The MQTT broker used is configured in the MQTT client settings.
     *                  If there is no connection, one is setup to the broker.
     *
-    * @param  {type} args JSON object containing:
+    * @param  {type} body JSON object containing:
     *                     mqttTopic: Topic the message should be published on
     *                     mqttMessage: Message payload that is posted on the topic.
     *                     qos: 0, 1 or 2 representing the quality of service to be used.
     *                     retain: true when sending as retained message or false.
     * @return {type}      returns an error object on failure or true when succesfull
     */
-    sendMessage(args) {
-        if (args !== undefined) {
+    sendMessage(body) {
+        if (body !== undefined) {
             try {
-                return this.broker.sendMessageToTopic(args.body);
+                return this.broker.sendMessageToTopic(body);
             } catch (error) {
                 this.logmodule.writelog('error', error);
             }
