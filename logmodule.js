@@ -39,16 +39,17 @@ function getDateTime() {
 function writelog(level, line) {
 
    switch(level) {
-      case 'error':
+/*      case 'error':
          Homey.ManagerNotifications.registerNotification({
             excerpt: line
          }, function( err, notification ) {
             if( err ) return console.error( err );
                if (DEBUG) console.log( 'Notification added' );
-         });
+         }); */
       case 'debug':
          if (DEBUG == false) break;
-      case 'info':   
+      case 'error':
+      case 'info':
          var logLine = getDateTime() + "   " + line;
          console.log( logLine );
 
@@ -64,4 +65,3 @@ function getLogLines() {
    writelog('debug', "getLogLines called");
    return logArray;
 }
-
