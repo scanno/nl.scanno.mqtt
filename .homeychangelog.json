@@ -1,0 +1,6 @@
+{
+  "2.4.1": {
+    "en": "Updated MQTT javascript library and use improved topic matching. Updated to SDK3",
+    "nl": "De javascript MQTT client bibliotheek is bijgewerkt. Het matchen van topics is verbetered. Upgrade naar SDK3"
+  }
+}
