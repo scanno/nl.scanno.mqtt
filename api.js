@@ -29,4 +29,10 @@ module.exports = {
     const result = await homey.app.subscribeToTopic(body.topic);
     return result;
   },
+
+  async unsubscribeTopic({ homey, params, body }) {
+    console.log("API: Incoming POST on /unsubscribe/");
+    const result = await homey.app.unsubscribeFromTopic(body.topic);
+    return result;
+  },
 };

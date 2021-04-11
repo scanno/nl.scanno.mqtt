@@ -73,5 +73,10 @@ class MQTTApp extends Homey.App {
         this.logmodule.writelog('info', 'API: subscribe to topic: ' + topic);
         return await this.broker.subscribeToApiTopic(topic);
     }
+
+    async unsubscribeFromTopic(topic) {
+      this.logmodule.writelog('info', 'API: unsubscribe from topic: ' + topic);
+      return await this.broker.unsubscribeFromTopicName(topic, 'api');
+  }
 }
 module.exports = MQTTApp;
