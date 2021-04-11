@@ -37,6 +37,15 @@ class handlingMQTT {
          triggerTopic: topic,
       }
 
+      // pre-check to prevent uneccesairy calls to the Homey trigger system
+      // prevents disabling of random flows not even listening to these topics (Homey BUG?)...
+      // this is also a performance boost, since the Homey trigger system won't be called for all api topics
+      // the small downside is the duplicate topic matching, if there is a match on a trigger topic (here & at the trigger listener...)
+      let triggerTopics = this.triggers.broker.getTopicArray().getTriggerTopics();
+      if(!triggerTopics.some(wildcard => this.triggers.topicMatches(topic, wildcard))) {
+         this.logmodule.writelog('debug', "Skip trigger no match found for trigger topic.");
+         return;
+      }
 
       try {
          this.logmodule.writelog('debug', "Trigger generic card for " + topic);
