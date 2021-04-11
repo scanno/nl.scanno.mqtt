@@ -305,6 +305,14 @@ class brokerMQTT {
       this.topicArray.removeTopic(topic);
     }
 
+    // Check if the topic is used by other types (api VS trigger)
+    const type = topic.isApiTopic() ? 'api' : 'trigger';
+    const otherTypes = TopicTypes.filter(t => t !== type);
+    if(otherTypes.some(otherType => this._isSubscribed(topicName, otherType))) {
+      this.logmodule.writelog('debug', "SKIP: Topic is in use by another topic type: " + otherTypes.join());
+      return; // prevent unsubscription
+    }
+
     // unsubscribe from broker
     try {
       const unsubscribeAsync = promisify(this.connectedClient.unsubscribe).bind(this.connectedClient);
@@ -317,6 +325,11 @@ class brokerMQTT {
       this.logmodule.writelog('error', error); 
       //throw error; // NOTE: catch fail
     }
+  }
+
+  _isSubscribed(topicName, type) {
+    const topic = this.topicArray.getTopic(topicName, type);
+    return topic && topic.isRegistered();
   }
 
    /**
