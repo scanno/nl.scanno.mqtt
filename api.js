@@ -26,7 +26,7 @@ module.exports = {
 
   async subscribeTopic({ homey, params, body }) {
     console.log("API: Incoming POST on /subscribe/");
-    const result = homey.app.subscribeToTopic(body.topic);
+    const result = await homey.app.subscribeToTopic(body.topic);
     return result;
   },
 };

@@ -1,17 +1,19 @@
 const mqtt      = require("mqtt");
+const { promisify } = require("util");
 var TopicArray = require("./Topics.js");
 var SendQueue = require("./SendQueue.js");
 var handleMQTT = require("./messagehandling.js");
+
+const TopicTypes = ['api', 'trigger'];
 
 class brokerMQTT {
 
    constructor(app) {
       this.logmodule = app.logmodule;
-      this.handleMessage = new handleMQTT(app);
-      //this.Homey = require('homey');
       this.Homey = app.homey;
       this.connectedClient = null;
 
+      this.handleMessage = new handleMQTT(app);
       this.topicArray = new TopicArray();
       this.sendqueue = new SendQueue();
 
@@ -102,11 +104,9 @@ class brokerMQTT {
    /**
     * connectToBroker - description
     *
-    * @param  {type} args  description
-    * @param  {type} state description
     * @return {type}       description
     */
-   connectToBroker(args, state) {
+   connectToBroker() {
       const ref = this;
       if (this.connectedClient == null && ref.brokerState !== "CONNECTING") {
          this.logmodule.writelog("connectedClient == null");
@@ -151,7 +151,7 @@ class brokerMQTT {
             });
 
          // On connection ...
-         ref.connectedClient.on('connect', function (connack) {
+         ref.connectedClient.on('connect',  async (connack) => {
             if (ref.errorOccured || ref.brokerState == "RECONNECTING") {
               ref.logmodule.writelog('error', ref.Homey.__("notifications.mqtt_online"));
             }
@@ -161,6 +161,9 @@ class brokerMQTT {
             ref.logmodule.writelog('info', "Connected Topics: " + ref.getTopicArray().getTriggerTopics());
             ref.logmodule.writelog('info', "Broker State: " + ref.brokerState);
 
+            // retry failed subsciptions (not registered) and remove topic if subscription is unsuccessfull
+            await ref.subscribeToUnregisteredTopics(false, false);
+
             // try to empty SendQueue
             while (!ref.sendqueue.isEmpty()) {
               ref.logmodule.writelog('debug', "sending queued messages");
@@ -168,13 +171,45 @@ class brokerMQTT {
             }
          });
 
-         this.connectedClient.on('message',function(topic, message, packet) {
-         // When a message is received, call receiveMessage for further processing
+         this.connectedClient.on('message', function(topic, message, packet) {
+            // When a message is received, call receiveMessage for further processing
             ref.logmodule.writelog('info', "OnMessage called");
-            ref.handleMessage.receiveMessage(topic, message, args, state);
+            ref.handleMessage.receiveMessage(topic, message);
          });
       };
    }
+
+    /**
+    * Subscribe to the topics in the topicsArray
+    */
+    async subscribeToUnregisteredTopics(keepFailed, forced) {
+      const topics = this.getTopicArray().getAll();
+      let visited = new Set();
+      for(let topic of topics) {
+         if(forced || !topic.isRegistered()) {
+  
+           const topicName = topic.getTopicName();
+           const api = topic.isApiTopic();
+
+           // skip duplicates
+           if(visited.has(topicName)) continue;
+           visited.add(topicName);
+  
+           // subscribe
+           try {
+              await this.subscribeToTopic(topicName, api);
+           } catch(error) {
+              ref.logmodule.writelog('info', "Failed to re-subscribe to topic " + topicName);
+    
+              // remove topic on failure? prevents endless retry loops for the same topic
+              if(!keepFailed) {
+                ref.logmodule.writelog('info', "Removing topic " + topicName);
+                this.topicArray.remove(topicName);
+              }
+           }
+         }
+      }
+    }
 
    /**
     * subscribeToTopic - description
@@ -182,55 +217,107 @@ class brokerMQTT {
     * @param  {type} topicName description
     * @return {type}           description
     */
-   subscribeToTopic(topicName, callback, api) {
-      if (!this.topicArray.active(topicName)) {
-         // Connect if no client available
-         if (this.connectedClient == null) {
-               this.connectToBroker();
-         }
+   async subscribeToTopic(topicName, api) {
 
-         if (!this.topicArray.exists(topicName)) {
-           if (api) {
-             this.logmodule.writelog('info', "subscribing to api topic " + topicName);
-             this.topicArray.addApiTopic(topicName);
-           } else {
-             this.logmodule.writelog('info', "subscribing to trigger topic " + topicName);
-             this.topicArray.addTriggerTopic(topicName);
-           }
-         }
+      // Connect if no client available
+      if (this.connectedClient == null) {
+        this.connectToBroker();
+      }
 
-         // First topic registration?
-         if (!this.topicArray.getTopic(topicName).isRegistered()) {
-            // Subscribe to topic
-            this.connectedClient.subscribe(topicName, (error) => {
-              // success?
-              if (error) {
-                 this.logmodule.writelog('error', "failed to subscribed to topic " + topicName);
-                 this.logmodule.writelog('error', error);
-                 if (this.topicArray.getTopic(topicName) !== null) {
-                   if (!this.topicArray.getTopic(topicName).isRegistered()) {
-                      this.topicArray.remove(topicName);
-                      this.logmodule.writelog('debug', "Removed from topiclist: " + topicName);
-                   }
-                 }
-              } else {
-                // Fill the array with known topics so I can check if I need to subscribe
-                this.topicArray.getTopic(topicName).setRegistered(true);
-                this.logmodule.writelog('info', "successfully subscribed to topic " + topicName);
-              }
-           });
-         }
-       } else { // already registered
-           this.logmodule.writelog('info', "already subscribed to topic " + topicName);
-           if (callback && typeof callback === 'function') {
-               callback(null, {});
-           }
-       }
+      // Fetch topic registration
+      const type = api ? 'api' : 'trigger';
+      let topic = this.topicArray.getTopic(topicName, type);
+
+      // First topic registration?
+      if(!topic) { 
+        if (api) {
+          this.logmodule.writelog('info', "subscribing to api topic " + topicName);
+          topic = this.topicArray.addApiTopic(topicName);
+        } else {
+          this.logmodule.writelog('info', "subscribing to trigger topic " + topicName);
+          topic = this.topicArray.addTriggerTopic(topicName);
+        }
+      } else {
+        if(topic.isApiTopic()) {
+          this.logmodule.writelog('info', "re-subscribing to api topic " + topicName);
+        } else {
+          this.logmodule.writelog('info', "re-subscribing to trigger topic " + topicName);
+        }
+      }
+
+      // NOTE: Always unsubscribe to prevent duplicate topic subscriptions.
+      // Thereby preventing multiple retained message streams for the same topic.
+      await this.unsubscribeFromTopic(topic, true);
+
+      // (Re-)Subscribe to topic.
+      this.logmodule.writelog('debug', "Start topic subscription " + topicName);
+      
+      try {
+        const subscribeAsync = promisify(this.connectedClient.subscribe).bind(this.connectedClient);
+        const result = await subscribeAsync(topicName); 
+
+        this.logmodule.writelog('info', "successfully subscribed to topic " + topicName);
+        
+        // mark registered
+        topic.setRegistered(true);
+
+        return topic; // TODO: generate & return registration ID
+      } catch(error) {
+        this.logmodule.writelog('error', "failed to subscribe to topic " + topicName);
+        this.logmodule.writelog('error', error);
+
+        // mark unregistered
+        this.topicArray.getTopic(topicName).setRegistered(false);
+        
+        return null;
+      }
    }
+   
+  async subscribeToApiTopic(topic) {
+    return await this.subscribeToTopic(topic, true);
+  }
 
-   subscribeToApiTopic(topic, callback) {
-        this.subscribeToTopic(topic, callback, true);
-   }
+  async unsubscribeFromTopicName(topicName, type, keepRegistration) {
+    const topic = this.topicArray.getTopic(topicName, type);
+    return await this.unsubscribeFromTopic(topic, keepRegistration);
+  }
+
+  async unsubscribeFromTopic(topic, keepRegistration) {
+    if(!topic) {
+      this.logmodule.writelog('debug', "SKIP: Already unsubscribed");
+      return;
+    }
+
+    const topicName = topic.getTopicName();
+    this.logmodule.writelog('info', "Unsubscribe from topic " + topicName);
+
+    // is registered/subscribed?
+    if (!topic.isRegistered()) {
+      this.logmodule.writelog('debug', "SKIP: Already unsubscribed");
+      return;
+    }
+
+    // remove topic OR mark topic unregistered
+    // NOTE: Independent of the actual unsubscribe result
+    if(keepRegistration) {
+      topic.setRegistered(false);
+    } else {
+      this.topicArray.removeTopic(topic);
+    }
+
+    // unsubscribe from broker
+    try {
+      const unsubscribeAsync = promisify(this.connectedClient.unsubscribe).bind(this.connectedClient);
+      await unsubscribeAsync(topicName);
+      
+      // successfully unsubscribed
+      this.logmodule.writelog('info', "Successfully unsubscribed from topic " + topicName);
+    } catch (error) {
+      this.logmodule.writelog('info', "Failed to unsubscribe from topic " + topicName);
+      this.logmodule.writelog('error', error); 
+      //throw error; // NOTE: catch fail
+    }
+  }
 
    /**
     * sendMessageToTopic - description
@@ -271,7 +358,7 @@ class brokerMQTT {
                 // There is no connection, so create a connection and send the message
                 if (this.brokerState !== "CONNECTING") {
                     this.logmodule.writelog('info', "Broker not connected, attempting connection");
-                    this.connectToBroker(args);
+                    this.connectToBroker();
 
                 } else {
                     this.logmodule.writelog('info', "Broker not available, waiting for connection");

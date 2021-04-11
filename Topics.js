@@ -5,8 +5,9 @@ const logmodule = require("./logmodule.js");
  *
  */
 class Topic {
-    constructor(topic) {
+    constructor(topic, api) {
       this.topic = topic;
+      this.api = !!api;
       this.registered = false;
       logmodule.writelog('debug', "Topic constructor("+topic+")");
     }
@@ -17,6 +18,10 @@ class Topic {
 
     getTopicName() {
       return this.topic;
+    }
+
+    isApiTopic() {
+      return this.api;
     }
 
     isRegistered() {
@@ -42,17 +47,33 @@ class TopicArray {
    * getTopic - description
    *
    * @param  {string} topic Name of the topic
+   * @param  {string} type [optional] 'trigger' | 'api'
    * @return {object}       Object from the api or trigger arrays matching the
    *                        name of the  topic. Null when not found.
    */
-  getTopic(topic) {
+  getTopic(topic, type) {
+    switch(type) {
+      case 'trigger':
+        return this.getTriggerTopic(topic);
+      case 'api':
+        return this.getApiTopic(topic);
+      default:
+         return this.getTriggerTopic(topic) || this.getApiTopic(topic);
+    }
+  }
+
+  getTriggerTopic(topic) {
     for (let i=0; i < this.triggerTopics.length; i++) {
       if (this.triggerTopics[i].getTopicName() === topic) {
         logmodule.writelog('debug', "Topic "+topic+" found in TriggerTopics");
         return this.triggerTopics[i];
       }
     }
-
+     // Trigger topic has not been found, so return null
+     return null
+  }
+  
+  getApiTopic(topic) {
      for (let i=0; i < this.apiTopics.length; i++) {
         if (this.apiTopics[i].getTopicName() === topic) {
           logmodule.writelog('debug', "Topic "+topic+" found in ApiTopics");
@@ -60,7 +81,7 @@ class TopicArray {
         }
      }
 
-     // Topic has not been found, so return null
+     // Api topic has not been found, so return null
      return null
   }
 
@@ -137,39 +158,37 @@ class TopicArray {
   /**
    * addApiTopic - description
    *
-   * @param  {string} topic  Name of the topic to add to the api array
-   * @return {boolean}       true when the topic is added
-   *                         false Otherwise
+   * @param  {string} topicName  Name of the topic to add to the api array
+   * @return {Topic}             The registered Topic info for this topic name
    */
-  addApiTopic(topic) {
-    var result = false;
-    logmodule.writelog('debug', "addApiTopic("+topic+") called");
-    if (!this.exists(topic)) {
-      this.apiTopics.push(new Topic(topic));
-      result = true;
+  addApiTopic(topicName) {
+    logmodule.writelog('debug', "addApiTopic("+topicName+") called");
+    let topic = this.getApiTopic(topicName);
+    if (!topic) {
+      topic = new Topic(topicName, true);
+      this.apiTopics.push(topic);
     } else {
-      logmodule.writelog('debug', "Topic "+topic+" already exists");
+      logmodule.writelog('debug', "Topic "+topicName+" already exists");
     }
-    return result;
+    return topic;
   }
 
   /**
    * addTriggerTopic - description
    *
-   * @param  {string} topic  Name of the topic to add to the trigger array
-   * @return {boolean}       true when the topic is added
-   *                         false Otherwise
+   * @param  {string} topicName  Name of the topic to add to the trigger array
+   * @return {Topic}             The registered Topic info for this topic name
    */
-  addTriggerTopic(topic) {
-    var result = false;
-    logmodule.writelog('debug', "addTriggerTopic("+topic+") called");
-    if (!this.exists(topic)) {
-      this.triggerTopics.push(new Topic(topic));
-      result = true;
+  addTriggerTopic(topicName) {
+    logmodule.writelog('debug', "addTriggerTopic("+topicName+") called");
+    let topic = this.getTriggerTopic(topicName);
+    if (!topic) {
+      topic = new Topic(topicName);
+      this.triggerTopics.push(topic);
     } else {
-      logmodule.writelog('debug', "Topic "+topic+" already exists");
+      logmodule.writelog('debug', "Topic "+topicName+" already exists");
     }
-    return result;
+    return topic;
   }
 
 
@@ -179,35 +198,62 @@ class TopicArray {
    * @return {Array}  Array of all topic names in the trigger array
    */
   getTriggerTopics() {
-    var result = [];
-    for (let i=0; i < this.triggerTopics.length; i++) {
-      result.push(this.triggerTopics[i].getTopicName());
-    }
-    return result;
+    return (this.triggerTopics || []).map(t => t.getTopicName());
+  }
+
+  /**
+   * getApiTopics - description
+   *
+   * @return {Array}  Array of all topic names in the api array
+   */
+  getApiTopics() {
+     return (this.apiTopics || []).map(t => t.getTopicName());
   }
 
   /**
    * remove - description
    *
    * @param  {string} topic name of the topic to remove from the list
+   * @param  {string} type [optional] 'trigger' | 'api'
    * @return {boolean}      true when succesfull, false otherwise
    */
-  remove(topic) {
-    var result = false;
-    if (this.exists(topic)) {
-      var index = this.getTriggerTopicIndex(topic);
-      if (index !== -1) {
-        this.triggerTopics.splice(index,1);
-        result = true;
-      }
-
-      index = this.getApiTopicIndex(topic);
-      if (index !== -1) {
-        this.apiTopics.splice(index,1);
-        var result = true;
-      }
+  remove(topic, type) {
+    switch(type) {
+      case 'trigger':
+        return this.removeTriggerTopic(topic);
+      case 'api':
+        return this.removeApiTopic(topic);
+      default:
+        const trigger = this.removeTriggerTopic(topic);
+        const api = this.removeApiTopic(topic);
+        return trigger || api;    
     }
-    return result;
+  }
+
+  removeTriggerTopic(topic) {
+    var index = this.getTriggerTopicIndex(topic);
+    if (index !== -1) {
+      this.triggerTopics.splice(index,1);
+      return true;
+    }
+    return false;
+  }
+
+  removeApiTopic(topic) {
+    index = this.getApiTopicIndex(topic);
+    if (index !== -1) {
+      this.apiTopics.splice(index,1);
+      return true;
+    }
+    return false;
+  }
+
+  removeTopic(topic) {
+    if(topic.isApiTopic()){
+      this.removeApiTopic(topic.getTopicName());
+    } else {
+      this.removeTriggerTopic(topic.getTopicName());
+    }
   }
 
   /**
@@ -225,6 +271,19 @@ class TopicArray {
    */
   getTriggerTopicArray() {
     return this.triggerTopics;
+  }
+
+  /**
+   * getApiTopicArray - description
+   *
+   * @return {array}  give a reference to the apiTopics array
+   */
+  getApiTopicArray() {
+    return this.apiTopics;
+  }
+
+  getAll() {
+    return this.triggerTopics.concat(this.apiTopics);
   }
 }
 
