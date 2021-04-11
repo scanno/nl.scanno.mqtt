@@ -21,22 +21,25 @@ class MQTTApp extends Homey.App {
       this.broker.updateRef(this);
     }
 
-   changedSettings(body) {
+   async changedSettings(body) {
       this.logmodule.writelog("changedSettings called");
-      this.logmodule.writelog("topics:" + this.broker.getTopicArray().getTopics())
 
-      if (this.broker.getTopicArray().getTopics().length > 0) {
-         this.broker.getConnectedClient().unsubscribe(this.broker.getTopicArray().getTopics());
-         this.broker.getTopicArray().clearTopicArray();
-      };
-
-      if (this.broker.getConnectedClient() !== null) {
-         this.broker.getConnectedClient().end(true);
+      // unsubscribe from all registered topics, but keep the registration.
+      const topics = this.broker.getTopicArray().getAll() || [];
+      for(let topic of topics) {
+         await this.broker.unsubscribeFromTopic(topic, true);
       }
 
-      this.logmodule.writelog("topics:" + this.broker.getTopicArray().getTopics());
-      this.broker.clearConnectedClient();
-      this.triggers.getTriggerArgs();
+      // disconnect
+      if (this.broker.getConnectedClient() !== null) {
+         this.broker.getConnectedClient().end(true);
+         this.broker.clearConnectedClient();
+      }
+      
+      // re-connect with new settings
+      // NOTE: When the client is connected, all existing topics will be re-subscribed
+      this.broker.connectToBroker();
+      
       return true;
    }
 
