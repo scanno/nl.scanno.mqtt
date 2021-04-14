@@ -227,7 +227,7 @@
             "id": "sayString",
             "title": {
                "en": "Say the received string through homeys speaker",
-               "nl": "Speel de ontvangen string af via homys interne speaker"
+               "nl": "Speel de ontvangen string af via homeys interne speaker"
             },
             "titleFormatted": {
               "en": "Speak [[voiceString]] through speaker",
