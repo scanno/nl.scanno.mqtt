@@ -1,5 +1,7 @@
 "use strict";
 
+const topicMatches = require('./topicmatches');
+
 class triggerMQTT {
 
    constructor (app) {
@@ -78,50 +80,7 @@ class triggerMQTT {
       })
    }
 
-   topicMatches(topic, wildcard) {
-      // MQTT subscription topics can contain "wildcards", i.e a + sign. However the topic returned
-      // by MQTT brokers contain the topic where the message is posted on. In that topic, the wildcard
-      // is replaced by the actual value. So we will have to take into account any wildcards when matching the topics.
-      // MQTT subscription topics can contain "wildcards", i.e a + sign. However the topic returned
-      // by MQTT brokers contain the topic where the message is posted on. In that topic, the wildcard
-      // is replaced by the actual value. So we will have to take into account any wildcards when matching the topics.
-
-      this.logmodule.writelog ('info', "topic: "+topic+" pattern: "+wildcard);
-      if (topic === wildcard) {
-         return true;
-      } else if (wildcard === '#') {
-         return true;
-      }
-      var res = [];
-      var t = String(topic).split('/');
-      var w = String(wildcard).split('/');
-
-      var i = 0;
-      for (var lt = t.length; i < lt; i++) {
-         if (w[i] === '+') {
-               res.push(t[i]);
-         } else if (w[i] === '#') {
-               res.push(t.slice(i).join('/'));
-               return true;
-         } else if (w[i] !== t[i]) {
-               return false;
-         }
-      }
-
-      if (w[i] === '#') {
-         i += 1;
-      }
-
-      if (i === w.length) {
-         return true;
-      } else {
-         return false;
-      }
-   }
-
    processMessage(args, state) {
-      var reconnectClient = false;
-
       // Make a connection to the broker. But only do this once. When the app is started, the connectedClient
       // variable is set to null, so there is no client connection yet to the broker. If so, then connect to the broker.
       // Otherwise, skip the connection.
@@ -129,7 +88,7 @@ class triggerMQTT {
 
       this.logmodule.writelog ('debug', "checking state.topic = " + state.triggerTopic + " topic = " + args.mqttTopic)
 
-      if (this.topicMatches(state.triggerTopic, args.mqttTopic)) {
+      if (topicMatches(state.triggerTopic, args.mqttTopic)) {
         this.logmodule.writelog ('info', "trigger topic = " + state.triggerTopic + " message topic = " + args.mqttTopic)
         return true;
       } else {
