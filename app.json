@@ -85,6 +85,28 @@
                   }
 	       }
             ]
+         },
+         {
+            "id": "brokerOnline",
+            "title": {
+               "en": "Broker online",
+               "nl": "Broker online"
+            },
+            "titleFormatted": {
+              "en": "Trigger when the broker connection is setup",
+              "nl": "Trigger wanneer er verbinding is gemaakt met de broker"
+            }
+         },
+         {
+            "id": "brokerOffline",
+            "title": {
+               "en": "Broker offline",
+               "nl": "Broker offline"
+            },
+            "titleFormatted": {
+              "en": "Trigger when the broker connection is lost",
+              "nl": "Trigger wanneer er geen verbinding meer is met de broker"
+            }
          }
       ],
       "actions": [

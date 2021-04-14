@@ -124,19 +124,22 @@ class brokerMQTT {
             ref.logmodule.writelog('info', "Broker State: " + ref.brokerState);
           });
 
-          ref.connectedClient.on('close', function() {
-             ref.logmodule.writelog('info', "MQTT Closed");
-             ref.brokerState = "DISCONNECTED";
-             ref.logmodule.writelog('info', "Broker State: " + ref.brokerState);
+          ref.connectedClient.on('close', () => {
+              ref.logmodule.writelog('info', "MQTT Closed");
+              ref.brokerState = "DISCONNECTED";
+              ref.logmodule.writelog('info', "Broker State: " + ref.brokerState);
            });
 
-           ref.connectedClient.on('offline', function() {
+           ref.connectedClient.on('offline', async () => {
               ref.logmodule.writelog('info', "MQTT Offline");
               if (ref.brokerState == "CONNECTED") {
                 ref.logmodule.writelog('error', ref.Homey.__("notifications.mqtt_offline"));
               }
               ref.brokerState = "DISCONNECTED";
               ref.logmodule.writelog('info', "Broker State: " + ref.brokerState);
+
+              // call broker online trigger flow card(s)
+              await this._triggerOffline();
             });
 
             ref.connectedClient.on('error', function(error) {
@@ -152,6 +155,7 @@ class brokerMQTT {
 
          // On connection ...
          ref.connectedClient.on('connect',  async (connack) => {
+           
             if (ref.errorOccured || ref.brokerState == "RECONNECTING") {
               ref.logmodule.writelog('error', ref.Homey.__("notifications.mqtt_online"));
             }
@@ -160,6 +164,9 @@ class brokerMQTT {
             ref.logmodule.writelog('info', "MQTT client connected");
             ref.logmodule.writelog('info', "Connected Topics: " + ref.getTopicArray().getTriggerTopics());
             ref.logmodule.writelog('info', "Broker State: " + ref.brokerState);
+
+            // call broker online trigger flow card(s)
+            await this._triggerOnline();
 
             // retry failed subsciptions (not registered) and remove topic if subscription is unsuccessfull
             await ref.subscribeToUnregisteredTopics(false, false);
@@ -178,6 +185,16 @@ class brokerMQTT {
          });
       };
    }
+
+   async _triggerOnline() {
+    const trigger = this.Homey.flow.getTriggerCard('brokerOnline');
+    await trigger.trigger(null, null);
+  }
+
+  async _triggerOffline(){
+    const trigger = this.Homey.flow.getTriggerCard('brokerOffline');
+    await trigger.trigger(null, null);
+  }
 
     /**
     * Subscribe to the topics in the topicsArray
