@@ -1,14 +1,14 @@
 "use strict";
 const Homey = require('homey');
 
-const brokerMQTT    = require("./broker.js");
-const actionsMQTT   = require("./actions.js");
-const triggerMQTT  = require("./triggers.js");
+const brokerMQTT  = require("./broker.js");
+const actionsMQTT = require("./actions.js");
+const triggerMQTT = require("./triggers.js");
 
 class MQTTApp extends Homey.App {
 
    /*
-      Initialize the Owntracks app. Register all variables,
+      Initialize the MQTT Client app. Register all variables,
       Connect to the broker when the broker is used.
       Register triggers, actions and conditions
    */

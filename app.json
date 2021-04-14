@@ -224,6 +224,58 @@
             ]
          },
          {
+            "id": "publishEmptyMessage",
+            "title": {
+               "en": "Remove retained message",
+               "nl": "Verwijder bewaard bericht"
+            },
+            "titleFormatted": {
+              "en": "Send an empty message on topic [[mqttTopic]] with QoS: [[qos]] to remove retained messages",
+              "nl": "Verstuur een leeg bericht op topic [[mqttTopic]] met QoS: [[qos]] om bewaarde berichten te verwijderen"
+            },
+            "args":[
+               {
+                  "name": "mqttTopic",
+                  "type": "text",
+                  "placeholder": {
+                     "en": "Retained topic",
+                     "nl": "Topic met bewaard bericht"
+                  }
+               },
+               {
+                  "name": "qos",
+                  "type": "dropdown",
+                  "title": {
+                     "en": "Quality of Service",
+                     "nl": "Quality of Service"
+                  },
+                  "values": [
+                     {
+                        "id": "0",
+                        "label": {
+                           "en": "QoS 0",
+                           "nl": "QoS 0"
+                        }
+                     },
+                     {
+                        "id": "1",
+                        "label": {
+                           "en": "QoS 1",
+                           "nl": "QoS 1"
+                        }
+                     },
+                     {
+                        "id": "2",
+                        "label": {
+                           "en": "QoS 2",
+                           "nl": "QoS 2"
+                        }
+                     }
+                  ]
+               }
+            ]
+         },
+         {
             "id": "sayString",
             "title": {
                "en": "Say the received string through homeys speaker",
