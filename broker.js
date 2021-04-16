@@ -277,13 +277,15 @@ class brokerMQTT {
       this.logmodule.writelog('debug', "Start topic subscription " + topicName);
       
       try {
+        
+        // mark all registered Topics for this topic name as subscribed
+        // NOTE: register the topic before the subscripton is successfull to handle incoming retained messages
+        this.topicsRegistry.setSubscribed(topicName, true);
+
         const subscribeAsync = promisify(this.connectedClient.subscribe).bind(this.connectedClient);
         const result = await subscribeAsync(topicName); 
 
         this.logmodule.writelog('info', "successfully subscribed to topic " + topicName);
-        
-        // mark all registered Topics for this topic name as subscribed
-        this.topicsRegistry.setSubscribed(topicName, true);
         
         return topic;
       } catch(error) {
