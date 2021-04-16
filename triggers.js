@@ -39,7 +39,7 @@ class triggerMQTT {
 
       const values = await this.eventMQTT.getArgumentValues();
       const topics = values.map(v => v.mqttTopic);
-      const existingTopics = Array.from(this.broker.getTopicsRegistry().getTriggerTopics() || []);
+      const existingTopics = Array.from(this.broker.getTopicsRegistry().getTriggerTopicNames() || []);
       const newTopics = new Set(topics.filter(t => !existingTopics.includes(t)));      // unique values
       const removedTopics = new Set(existingTopics.filter(t => !topics.includes(t)));  // unique values
 
