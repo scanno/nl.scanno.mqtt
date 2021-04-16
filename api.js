@@ -26,13 +26,18 @@ module.exports = {
 
   async subscribeTopic({ homey, params, body }) {
     console.log("API: Incoming POST on /subscribe/");
-    const result = await homey.app.subscribeToTopic(body.topic);
+    const result = await homey.app.subscribeToTopic(body.topic, body.reference);
     return result === undefined ? null : result;
   },
 
   async unsubscribeTopic({ homey, params, body }) {
     console.log("API: Incoming POST on /unsubscribe/");
-    const result = await homey.app.unsubscribeFromTopic(body.topic);
-    return result === undefined ? null : result;
+    if(!body.topic && !body.reference) {
+      throw new Error('No reference provided in the request body. Can only unsubscribe from topics subscribed with a reference (e.g. app.id)');
+    }  
+
+    return body.topic 
+      ? await homey.app.unsubscribeFromTopic(body.topic, body.reference)
+      : await homey.app.unsubscribeFromAllTopicsForReference(body.reference);
   },
 };

@@ -1,5 +1,7 @@
 "use strict";
 
+const DEBUG = process.env.DEBUG === '1';
+
 const topicMatches = require('./topicmatches');
 const TriggerQueue = require('./TriggerQueue');
 
@@ -41,13 +43,16 @@ class handlingMQTT {
          messageToSend = message;
       }
 
-      let apiTopics = this.broker.getTopicArray().getApiTopics();
-      if(apiTopics.some(wildcard => topicMatches(topic, wildcard))) {
-         this.logmodule.writelog('debug', "send message to listeners via realtime api");
-         this.logmodule.writelog('debug', topic + ": " + message);
+      if(this.broker.getTopicsRegistry().hasApiMatch(topic)) {
+         if(DEBUG) {
+            this.logmodule.writelog('debug', "send message to listeners via realtime api");
+            this.logmodule.writelog('debug', topic + ": " + message);
+         }
          this.Homey.api.realtime(topic, messageToSend);
       } else {
-         this.logmodule.writelog('debug', "Skip realtime no match found for api topic.");
+         if(DEBUG) {
+            this.logmodule.writelog('debug', "Skip realtime no match found for api topic.");
+         }
       }
    }
 

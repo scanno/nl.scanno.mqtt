@@ -38,8 +38,7 @@ class TriggerQueue {
         // prevents disabling of random flows not even listening to these topics (Homey BUG?)...
         // this is also a performance boost, since the Homey trigger system won't be called for all api topics
         // the small downside is the duplicate topic matching, if there is a match on a trigger topic (here & at the trigger listener...)
-        let triggerTopics = this.broker.getTopicArray().getTriggerTopics();
-        let triggers = triggerTopics.filter(wildcard => topicMatches(topic, wildcard));
+        let triggers = this.broker.getTopicsRegistry().getTriggerMatches(topic).map(t => t.getTopicName());
         if(triggers.length == 0) {
             this.logmodule.writelog('debug', "Skip trigger no match found for trigger topic.");
             return false;

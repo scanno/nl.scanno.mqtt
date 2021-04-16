@@ -25,9 +25,13 @@ class MQTTApp extends Homey.App {
       this.logmodule.writelog("changedSettings called");
 
       // unsubscribe from all registered topics, but keep the registration.
-      const topics = this.broker.getTopicArray().getAll() || [];
+      const topics = this.broker.getTopicsRegistry().getTopics() || [];
+      let visited = new Set();
       for(let topic of topics) {
-         await this.broker.unsubscribeFromTopic(topic, true);
+        if(!visited.has(topic.getTopicName())) {
+          visited.add(topic.getTopicName());
+          await this.broker.unsubscribeFromTopic(topic, true, true);
+        }
       }
 
       // disconnect
@@ -69,14 +73,22 @@ class MQTTApp extends Homey.App {
         }
     }
 
-    async subscribeToTopic(topic) {
+    async subscribeToTopic(topic, reference) {
         this.logmodule.writelog('info', 'API: subscribe to topic: ' + topic);
-        return await this.broker.subscribeToApiTopic(topic);
+        return await this.broker.subscribeToApiTopic(topic, reference);
     }
 
-    async unsubscribeFromTopic(topic) {
+    async unsubscribeFromTopic(topic, reference) {
       this.logmodule.writelog('info', 'API: unsubscribe from topic: ' + topic);
-      return await this.broker.unsubscribeFromTopicName(topic, 'api');
-  }
+      if(reference === 'trigger' || reference === 'api') {
+        this.logmodule.writelog('info', '[WARNING] Unsubscribe from topic not allowed');
+        return;
+      }
+      return await this.broker.unsubscribeFromTopicName(topic, reference || 'api');
+    }
+    async unsubscribeFromAllTopicsForReference(reference) {
+        this.logmodule.writelog('info', 'API: unsubscribe from topics with reference: ' + reference);
+      return await this.broker.unsubscribeFromAllTopicsWithReference(reference);
+    }
 }
 module.exports = MQTTApp;
