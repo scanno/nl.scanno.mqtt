@@ -57,7 +57,7 @@ class MyApp extends Homey.App {
         // messages will pass through the onMessage method via the realtime api
         MQTTClient.post(
             'subscribe', 
-            { topic: 'homey/#' }, 
+            { topic: 'homey/#', reference: 'my.app.id' }, 
             (error) => this.log(error || 'subscribed to topic: homey/#')
         );
 
@@ -77,7 +77,13 @@ class MyApp extends Homey.App {
     }
 
     unregister(){
-        // ...
+        // Unsubscribe from topics used by this app
+        // If the topic is not provided, all topics used by 'my.app.id' will be unsubscribed
+        MQTTClient.post(
+            'unsubscribe', 
+            { topic: 'homey/#', reference: 'my.app.id' }, 
+            (error) => this.log(error || 'subscribed to topic: homey/#')
+        );
     }
 }
 ```

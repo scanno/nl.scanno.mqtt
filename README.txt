@@ -17,5 +17,5 @@ The settings page contains:
 MQTT support for other apps / drivers
 
 The MQTT Client includes a simple way for other applications / drivers to use MQTT
-by supplying a way to subscribe to MQTT topics and sending messages to a MQTT topic.
+by supplying a way to subscribe to and unsubscribe from MQTT topics and sending messages to a MQTT topic.
 This eliminates the need for the application/drivers to include their own MQTT client.
