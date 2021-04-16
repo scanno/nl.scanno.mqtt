@@ -285,7 +285,7 @@ class brokerMQTT {
         // mark all registered Topics for this topic name as subscribed
         this.topicsRegistry.setSubscribed(topicName, true);
         
-        return topic; // TODO: generate & return registration ID
+        return topic;
       } catch(error) {
         this.logmodule.writelog('error', "failed to subscribe to topic " + topicName);
         this.logmodule.writelog('error', error);
@@ -356,6 +356,9 @@ class brokerMQTT {
 
       // mark all registered Topics for this topic name as unsubscribed
       this.topicsRegistry.setSubscribed(topicName, false);
+
+      // remove any remaining queued trigger from the trigger queue
+      this.handleMessage.removeTopic(topicName);
 
     } catch (error) {
       this.logmodule.writelog('info', "Failed to unsubscribe from topic " + topicName);

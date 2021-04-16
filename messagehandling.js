@@ -23,8 +23,6 @@ class handlingMQTT {
     *
     * @param  {type} topic   topic where message was published on
     * @param  {type} buffer  payload of the received message
-    * @param  {type} args    list of arguments that are part of the trigger FlowCardTrigger
-    * @param  {type} state   state arguments of the FlowCardTrigger
     * @return {type}         no return value
     */
    async receiveMessage(topic, buffer) {
@@ -33,6 +31,15 @@ class handlingMQTT {
       const message = buffer.toString();
       this.triggerQueue.add(topic, message);
       this.dispatchToRealtimeApi(topic, message);
+   }
+
+   /**
+    * removeTopic - Handling of unsubscribed topics
+    * Clears any remaining messages for the topic in the trigger queue
+    * @param {string} topic unsubscribed topic 
+    */
+   removeTopic(topic) {
+      this.triggerQueue.removeMessagesForTopic(topic);
    }
 
    dispatchToRealtimeApi(topic, message) {

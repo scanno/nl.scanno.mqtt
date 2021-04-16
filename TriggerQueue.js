@@ -30,7 +30,7 @@ class TriggerQueue {
     }
 
     /**
-     * Add a message to the trigger queue
+     * add - Add a message to the trigger queue
      * @param {string} topic  
      * @param {string} message 
      */
@@ -64,12 +64,25 @@ class TriggerQueue {
 
     // Choose the correct queue for incoming messages
     _addToQueue(trigger) {
-        // is limited topic?
+        // is delayed topic?
         if(trigger.triggers.some(wildcard => this.delayedTopics.has(wildcard))) {
-            this.delayedQueue.push(trigger); // add the trigger to the limited queue
+            this.delayedQueue.push(trigger); // add the trigger to the delayed queue
         } else {
             this.queue.push(trigger);        // leave the trigger on the regular queue
         }
+    }
+
+    /**
+    * removeMessagesForTopic - Remove all queued messages for a specific topic from the trigger queue
+    * e.g. Can be used to clean-up when the topic on a flow card trigger is changed
+    * @param {string} topic the topic to remove all messages for
+    */
+    removeMessagesForTopic(topic) {
+        let total = this.queue.length + this.delayedQueue.length;
+        this.queue = this.queue.filter(t => t.topic === topic);
+        this.delayedQueue = this.delayedQueue.filter(t => t.topic === topic);
+        let remaining = this.queue.length - this.delayedQueue.length;
+        this.logmodule.writelog('info', "Removed "+(total-remaining)+" messages from the trigger queue, "+remaining+" remaining");
     }
 
     /**
@@ -165,7 +178,9 @@ class TriggerQueue {
         }
     }
 
-    // process next message in queue
+    /**
+     * next - process the next message in the queue
+     */
     async next() {
         var trigger = this.queue.shift() || this.delayedQueue.shift();
         if (trigger) {
@@ -201,6 +216,10 @@ class TriggerQueue {
          }
     }
 
+    /**
+     * getState - get processing info 
+     * @returns the number of messages being processed
+     */
     getState() {
         let total = Math.max(this.getCount(), this.total);
         return {
@@ -210,14 +229,24 @@ class TriggerQueue {
         };
     }
     
+    /**
+     * start - start processing messages in the queue
+     */
     start() {
         this.running = true;
         this.process();
     }
+
+    /**
+     * stop - stop processing messages in the queue
+     */
     stop() {
         this.running = false;
     }
 
+    /**
+     * clear - remove all messages from the queue
+     */
     clear() {
         this.queue = [];
         this.delayedTopics.clear();
@@ -236,6 +265,9 @@ class TriggerQueue {
         this.broker = app.broker;
     }
 
+    /**
+     * destroy - Destroy the TriggerQeueu
+     */
     destroy() {
         this.stop();
         this.clear();
