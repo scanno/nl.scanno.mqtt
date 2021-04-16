@@ -4,6 +4,7 @@ var TopicsRegistry = require("./TopicsRegistry.js");
 var SendQueue = require("./SendQueue.js");
 var handleMQTT = require("./messagehandling.js");
 
+const DEBUG = process.env.DEBUG === '1';
 
 const TRIGGER_REF = 'trigger';
 const API_REF     = 'api';
@@ -174,7 +175,9 @@ class brokerMQTT {
 
             // try to empty SendQueue
             while (!ref.sendqueue.isEmpty()) {
-              ref.logmodule.writelog('debug', "sending queued messages");
+              if(DEBUG) {
+                ref.logmodule.writelog('debug', "sending queued messages");
+              }
               ref.sendMessageToTopic(ref.sendqueue.removeMessage());
             }
          });
@@ -369,8 +372,9 @@ class brokerMQTT {
     */
     sendMessageToTopic(args) {
         this.logmodule.writelog('info', "SendMessageToTopic called");
-        this.logmodule.writelog('debug', "SendMessageToTopic: " + JSON.stringify(args));
-//        this.logmodule.writelog('debug', "qos: " + parseInt(args.qos));
+        if(DEBUG) {
+          this.logmodule.writelog('debug', "SendMessageToTopic: " + JSON.stringify(args));
+        }
 
         // validate
         if (!args) {
@@ -379,8 +383,10 @@ class brokerMQTT {
         }
         if (!args.mqttTopic) {
             this.logmodule.writelog('error', "SendMessageToTopic: no mqttTopic provided in arguments");
-            this.logmodule.writelog('debug', "arguments: ");
-            this.logmodule.writelog('debug', JSON.stringify(args, null, 2));
+            if(DEBUG) {
+              this.logmodule.writelog('debug', "arguments: ");
+              this.logmodule.writelog('debug', JSON.stringify(args, null, 2));
+            }
             return;
         }
 
@@ -392,7 +398,9 @@ class brokerMQTT {
                 retain: args.retain === true || args.retain === '1' || args.retain === 'true'
             };
 
-            this.logmodule.writelog('debug', "publish_options: " + JSON.stringify(publish_options));
+            if(DEBUG) {
+              this.logmodule.writelog('debug', "publish_options: " + JSON.stringify(publish_options));
+            }
 
             // Check if there is already a connection  to the broker
             if (!this.connectedClient || this.brokerState === "CONNECTING") {
@@ -415,9 +423,11 @@ class brokerMQTT {
                 }
 
                 // publish messsage to topic
-                this.connectedClient.publish(args.mqttTopic, args.mqttMessage, publish_options, () =>
+                this.connectedClient.publish(args.mqttTopic, args.mqttMessage, publish_options, () => {
+                  if(DEBUG) {
                     this.logmodule.writelog('debug', "send " + args.mqttMessage + " on topic " + args.mqttTopic)
-                );
+                  }
+                });
             }
         } catch (err) {
             this.logmodule.writelog('error', "sendMessageToTopic: " + err);

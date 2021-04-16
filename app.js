@@ -5,6 +5,7 @@ const brokerMQTT  = require("./broker.js");
 const actionsMQTT = require("./actions.js");
 const triggerMQTT = require("./triggers.js");
 
+const DEBUG = process.env.DEBUG === '1';
 class MQTTApp extends Homey.App {
 
    /*

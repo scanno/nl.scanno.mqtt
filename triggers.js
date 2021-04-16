@@ -1,5 +1,7 @@
 "use strict";
 
+const DEBUG = process.env.DEBUG === '1';
+
 const topicMatches = require('./topicmatches');
 
 class triggerMQTT {
@@ -92,7 +94,9 @@ class triggerMQTT {
         this.logmodule.writelog ('info', "trigger topic = " + state.triggerTopic + " message topic = " + args.mqttTopic)
         return true;
       } else {
-        this.logmodule.writelog('debug', "We are not waiting for this topic");
+         if(DEBUG) {
+            this.logmodule.writelog('debug', "We are not waiting for this topic");
+         }
         return false;
       }
    }

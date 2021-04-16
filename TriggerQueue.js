@@ -1,5 +1,7 @@
 "use strict";
 
+const DEBUG = process.env.DEBUG === '1';
+
 const delay = require('./delay');
 const topicMatches = require('./topicmatches');
 
@@ -40,7 +42,9 @@ class TriggerQueue {
         // the small downside is the duplicate topic matching, if there is a match on a trigger topic (here & at the trigger listener...)
         let triggers = this.broker.getTopicsRegistry().getTriggerMatches(topic).map(t => t.getTopicName());
         if(triggers.length == 0) {
-            this.logmodule.writelog('debug', "Skip trigger no match found for trigger topic.");
+            if(DEBUG) {
+                this.logmodule.writelog('debug', "Skip trigger no match found for trigger topic.");
+            }
             return false;
         }
    
@@ -188,7 +192,9 @@ class TriggerQueue {
          }
    
          try {
-            this.logmodule.writelog('debug', "Trigger generic card for " + topic);
+            if(DEBUG) {
+                this.logmodule.writelog('debug', "Trigger generic card for " + topic);
+            }
             await this.triggers.getEventMQTT().trigger(tokens, triggerstate);
          } catch(e) {
             this.logmodule.writelog('error', "Error occured: " +e);

@@ -1,5 +1,7 @@
 "use strict";
 
+const DEBUG = process.env.DEBUG === '1';
+
 class actionsMQTT {
    constructor (app) {
       this.logmodule = app.logmodule;
@@ -28,7 +30,9 @@ class actionsMQTT {
       // Put all the action trigger here for registering them and executing the action
       // Action for sending a message to the broker on the specified topic
       this.publishMQTT.registerRunListener((args, state ) => {
-         ref.logmodule.writelog('debug', "Listener publishMQTT called");
+         if(DEBUG) {
+            ref.logmodule.writelog('debug', "Listener publishMQTT called");
+         }
          try {
             ref.broker.sendMessageToTopic(args);
             return Promise.resolve( true );
@@ -39,7 +43,9 @@ class actionsMQTT {
       })
 
       this.publishEmpty.registerRunListener((args, state ) => {
-         ref.logmodule.writelog('debug', "Listener publishEmptyMessage called");
+         if(DEBUG) {
+            ref.logmodule.writelog('debug', "Listener publishEmptyMessage called");
+         }
          try {
             ref.broker.sendMessageToTopic(args);
             return Promise.resolve( true );
@@ -50,7 +56,9 @@ class actionsMQTT {
       })
 
       this.publishMQTT_Adv.registerRunListener((args, state ) => {
-         ref.logmodule.writelog('debug', "Listener publishMQTT_Adv called");
+         if(DEBUG) {
+            ref.logmodule.writelog('debug', "Listener publishMQTT_Adv called");
+         }
          try {
             ref.broker.sendMessageToTopic(args);
             return Promise.resolve( true );
@@ -62,7 +70,10 @@ class actionsMQTT {
 
       // Action for speaking out the string recieved from MQTT topic
       this.sayString.registerRunListener((args, state ) => {
-         ref.logmodule.writelog('debug', "Listener sayString called");
+         if(DEBUG) {
+            ref.logmodule.writelog('debug', "Listener sayString called");
+         }
+
          try {
             ref.homeySayString(args);
           } catch(err) {
