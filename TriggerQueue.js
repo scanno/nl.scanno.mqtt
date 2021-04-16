@@ -9,6 +9,7 @@ const topicMatches = require('./topicmatches');
 // And there is a second limit of 100 calls per minute
 const RATE_LIMIT = 10;              // max 10 triggers per second
 const RATE_LIMIT_DELAY = 6 * 1000;  // wait 6 seconds to pervent hitting the second limit of 100 messages per minute
+const MAX_QUEUE_SIZE = 10000;       // TODO: make configurable via app settings?
 
 class TriggerQueue {
     constructor(app) {
@@ -78,10 +79,10 @@ class TriggerQueue {
     * @param {string} topic the topic to remove all messages for
     */
     removeMessagesForTopic(topic) {
-        let total = this.queue.length + this.delayedQueue.length;
+        let total = this.getCount();
         this.queue = this.queue.filter(t => t.topic === topic);
         this.delayedQueue = this.delayedQueue.filter(t => t.topic === topic);
-        let remaining = this.queue.length - this.delayedQueue.length;
+        let remaining = this.getCount();
         this.logmodule.writelog('info', "Removed "+(total-remaining)+" messages from the trigger queue, "+remaining+" remaining");
     }
 
@@ -121,8 +122,10 @@ class TriggerQueue {
                         this.logmodule.writelog('info', "[WARNING] Rate limiter hit for topic: " + trigger.topic + ' on trigger ' + wildcard);
                         this.logmodule.writelog('info', this.getCount() + " messages left in the trigger queue");
 
-                        // wait?
-                        if (RATE_LIMIT_DELAY > 0) {
+                        // WAIT if a rate limit delay is configured.
+                        // BUT just execute the trigger if the max number of queue messages is reached.
+                        // This automatically causes the flow to be disabled by the Homey rate limiter. 
+                        if (RATE_LIMIT_DELAY > 0 && this.getCount() <= MAX_QUEUE_SIZE) {
                             try {
                                 // mark wilcard as delayed & move messages to the delayed queue
                                 this._handleRateLimitedTriggerTopic(wildcard);
@@ -133,6 +136,10 @@ class TriggerQueue {
                             } catch (e) {
                                 this.logmodule.writelog('info', "TriggerQueue: Rate limiting delay failure");
                                 this.logmodule.writelog('error', e);
+                            }
+                        } else {
+                            if(this.getCount() > MAX_QUEUE_SIZE) {
+                                this.logmodule.writelog('info', "[WARNING] TriggerQueue size to large, allowing Homey to disable the flow trigger(s)");
                             }
                         }
     
