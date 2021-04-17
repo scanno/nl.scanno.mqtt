@@ -8,7 +8,7 @@
       "en": "Subscripe to MQTT topics",
       "nl": "Abonneer op MQTT topics"
    },
-   "version": "2.3.0",
+   "version": "3.0.0",
    "sdk": 3,
    "compatibility": ">=5.0.0",
    "category": [
