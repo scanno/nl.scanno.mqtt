@@ -98,16 +98,38 @@ class MQTTApp extends Homey.App {
     }
 
     async unsubscribeFromTopic(topic, reference) {
+      let response = {
+        result: -1,
+        error: ""
+      }
       this.logmodule.writelog('info', 'API: unsubscribe from topic: ' + topic);
       if(reference === 'trigger' || reference === 'api') {
         this.logmodule.writelog('info', '[WARNING] Unsubscribe from topic not allowed');
-        return;
+        response.error = 'Unsubscribe from topic not allowed';
+        return response;
       }
-      return await this.broker.unsubscribeFromTopicName(topic, reference || 'api');
+
+      try {
+        await this.broker.unsubscribeFromTopicName(topic, reference || 'api');
+        response.result = 0;
+      } catch (error) {
+        response.error = error;
+      }
+      return response;
     }
     async unsubscribeFromAllTopicsForReference(reference) {
+      let response = {
+        result: -1,
+        error: ""
+      }
+      try {
         this.logmodule.writelog('info', 'API: unsubscribe from topics with reference: ' + reference);
-      return await this.broker.unsubscribeFromAllTopicsWithReference(reference);
+        await this.broker.unsubscribeFromAllTopicsWithReference(reference);
+        response.result = 0;
+      } catch (error) {
+        response.error = error;
+      }
+      return response;
     }
 }
 module.exports = MQTTApp;
