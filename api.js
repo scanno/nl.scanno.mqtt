@@ -20,12 +20,20 @@ module.exports = {
 
   async sendMessage({ homey, params, body }) {
     console.log("API: Incoming POST on /send/ ");
+    if (!homey.app) {
+      console.log("API: App not yet available");
+      return ("too soon");
+    }
     const result = homey.app.sendMessage(body);
     return result;
   },
 
   async subscribeTopic({ homey, params, body }) {
     console.log("API: Incoming POST on /subscribe/");
+    if (!homey.app) {
+      console.log("API: App not yet available");
+      return ("too soon");
+    }
     const result = homey.app.subscribeToTopic(body.topic);
     return result;
   },
