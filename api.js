@@ -20,18 +20,32 @@ module.exports = {
 
   async sendMessage({ homey, params, body }) {
     console.log("API: Incoming POST on /send/ ");
+    if (!homey.app) {
+      console.log("API: App not yet available");
+      return ("too soon");
+    }
     const result = homey.app.sendMessage(body);
     return result === undefined ? null : result;
   },
 
   async subscribeTopic({ homey, params, body }) {
     console.log("API: Incoming POST on /subscribe/");
+    if (!homey.app) {
+        console.log("API: App not yet available");
+        return ("too soon");
+    }
+
     const result = await homey.app.subscribeToTopic(body.topic, body.reference);
     return result === undefined ? null : result;
   },
 
   async unsubscribeTopic({ homey, params, body }) {
     console.log("API: Incoming POST on /unsubscribe/");
+    if (!homey.app) {
+        console.log("API: App not yet available");
+        return ("too soon");
+    }
+
     if(!body.topic && !body.reference) {
       throw new Error('No reference provided in the request body. Can only unsubscribe from topics subscribed with a reference (e.g. app.id)');
     }  

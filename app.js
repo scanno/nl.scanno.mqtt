@@ -65,18 +65,36 @@ class MQTTApp extends Homey.App {
     * @return {type}      returns an error object on failure or true when succesfull
     */
     sendMessage(body) {
-        if (body !== undefined) {
-            try {
-                return this.broker.sendMessageToTopic(body);
-            } catch (error) {
-                this.logmodule.writelog('error', error);
-            }
-        }
+      let response = {
+        result: -1,
+        error: ""
+      }
+      if (body !== undefined) {
+          try {
+            this.broker.sendMessageToTopic(body);
+            response.result = 0;
+            return response;
+          } catch (error) {
+              this.logmodule.writelog('error', error);
+              response.error=error;
+          }
+      }
+      return response;
     }
 
     async subscribeToTopic(topic, reference) {
-        this.logmodule.writelog('info', 'API: subscribe to topic: ' + topic);
-        return await this.broker.subscribeToApiTopic(topic, reference);
+      let response = {
+        result: -1,
+        error: ""
+      }
+      this.logmodule.writelog('info', 'API: subscribe to topic: ' + topic);
+      try {
+          await this.broker.subscribeToApiTopic(topic, reference);
+          response.result = 0;
+      } catch (error) {
+          response.error = error;
+      }
+      return response;
     }
 
     async unsubscribeFromTopic(topic, reference) {
